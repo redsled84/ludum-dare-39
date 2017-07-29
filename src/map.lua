@@ -4,7 +4,7 @@ local vectorUtils = require 'utils.vectorUtils'
 -- constants
 local zeroVector = vectorUtils.getZeroVector()
 local sprites = {
-  floor = love.graphics.newImage('sprites/floor3.png'),
+  floor = love.graphics.newImage('sprites/floor_basic.png'),
   wall = love.graphics.newImage('sprites/wall.png'),
 }
 local spriteNums = {
