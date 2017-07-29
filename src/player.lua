@@ -41,7 +41,7 @@ function Player:getPixelPosition()
 end
 
 function Player:update(dt)
-  Player:updateTween(dt)  
+  -- Player:updateTween(dt)
 end
 
 function Player:updateTween(dt)
@@ -82,7 +82,7 @@ function Player:handleKeys(key, Map, Events)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
-    Events:add(self.movePosition, {delta}, self.moveDuration)
+    self:setPosition(delta)
     self:removePower(powerDecrement)
   end
 end
@@ -93,9 +93,9 @@ function Player:checkNextPosition(delta, Map)
   return val == 1
 end
 
-function Player.movePosition(delta)
-  Player.tween:start(tileSize * Player.position, tileSize * (Player.position + delta), Player.moveDuration)
-  Player.position = Player.position + delta
+function Player:setPosition(delta)
+  self.position = self.position + delta
+  self.drawPosition = self.drawPosition + delta * tileSize
 end
 
 return Player

@@ -20,7 +20,6 @@ local vector = require 'libs.vector'
 
 -- TODO: implement animations
 -- src
-Events = require 'src.events'
 local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
@@ -46,8 +45,6 @@ function Game:initialize()
   local spawnPosition = findSpawnPosition()
   Player:initialize(spawnPosition)
 
-  Events:initialize()
-
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
   self.Entities = {
@@ -62,7 +59,7 @@ function Game:update(dt)
 
   if self.state ~= 'game_over' then
     -- TODO: Loop over Entities and link them to the Actions queue
-    Player:update(dt)
+    -- Player:update(dt)
 
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
@@ -70,9 +67,6 @@ function Game:update(dt)
   Map:bindEntitiesToGrid(self.Entities)
 
   -- Then update the turns
-  -- TODO: add Queuing / turn based actions here
-  print(inspect(Events.Queue))
-  Events:stepEvents(dt)
 end
 
 function Game:checkState()
@@ -113,12 +107,7 @@ function Game:keypressed(key)
     love.event.quit()
   end
 
-  if key == 'r' then
-    local temp = function(str) print(str) end
-    Events:add(temp, {'Action Completed'}, 2)
-  end
-
-  Player:handleKeys(key, Map, Events)
+  Player:handleKeys(key, Map)
 end
 
 return Game
