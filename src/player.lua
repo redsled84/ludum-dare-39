@@ -31,7 +31,15 @@ function Player:removePower(dec)
   self.power = self.power - dec
 end
 
+function Player:getPower()
+  return self.power
+end
+
 function Player:update(dt)
+  Player:updateTween(dt)  
+end
+
+function Player:updateTween(dt)
   if self.tween:inProgress() then
     self.tween:update(dt)
     self.drawPosition = self.tween:position()

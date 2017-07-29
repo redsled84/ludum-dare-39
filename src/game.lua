@@ -1,5 +1,12 @@
 -- constants
 tileSize = 32
+states = {
+  game_start = 'game_start',
+  game_over = 'game_over',
+  ingame_menu = 'ingame_menu',
+  splash_menu = 'splash_menu',
+  level_change = 'level_change'
+}
 
 -- libs
 local class = require 'libs.middleclass'
@@ -22,24 +29,42 @@ function Game:initialize()
   self.Entities = {
     Player,
   }
+  self.state = 'game_start'
 end
 
 function Game:update(dt)
   -- Check for behavior first
+  Game:checkState()
+
+  if self.state ~= 'game_over' then
+    Player:update(dt)
+  end
   Map:bindEntitiesToGrid(self.Entities)
-  Player:update(dt)
   -- Then update the turns
   -- TODO: add Queuing / turn based actions here 
+end
+
+function Game:checkState()
+  if Player:getPower() <= 0 then
+    self.state = 'game_over'
+  end
 end
 
 function Game:draw(bool)
   if not bool then return end
 
-  Player:draw()
+  if self.state == 'game_start' then
+    Player:draw()
+  elseif self.state == 'game_over' then
+    -- TODO: change game over screen with player animation dying and restarting game
+    love.graphics.setColor(255,0,0)
+    love.graphics.print('You Lost!',
+      love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
+  end
 end
 
 function Game:drawDebug(bool)
-  if not bool then return end
+  if not bool and self.state ~= 'game_over' then return end
   Player:drawDebug()
   Map:drawDebug({'map', 'outline'})
 end
