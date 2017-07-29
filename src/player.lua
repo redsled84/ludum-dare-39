@@ -49,7 +49,7 @@ function Player:draw()
   local x, y = self.position.x, self.position.y
   -- TODO: replace with sprites
   love.graphics.setColor(255,255,255)
-  love.graphics.draw(self.sprite, x * tileSize, y * tileSize)
+  love.graphics.draw(self.sprite, x * tileSize, y * tileSize - 16)
 end
 
 function Player:drawDebug()

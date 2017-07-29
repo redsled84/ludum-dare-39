@@ -43,7 +43,7 @@ end
 function Game:drawDebug(bool)
   if not bool then return end
   Player:drawDebug()
-  Map:drawGridDebug()
+  Map:drawDebug()
 end
 
 function Game:keypressed(key)

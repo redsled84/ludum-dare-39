@@ -44,13 +44,13 @@ function Map:applyEntityPositionsToGrid(entities)
 end
 
 function Map:drawDebug()
-  love.graphics.setColor(255,255,255)
-
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do
-      love.graphics.rectangle('line', x * tileSize, y * tileSize, tileSize)
-      local pos = tostring(x) .. ', ' .. tostring(y)
-      love.graphics.print(pos, tileSize, tileSize)
+      love.graphics.setColor(255, 255, 255, 100)
+      love.graphics.rectangle('line', (x - 1) * tileSize, (y - 1) * tileSize, tileSize, tileSize)
+      love.graphics.setColor(0, 255, 255, 180)
+      love.graphics.print(tostring(x), (x - 1) * tileSize, (y - 1) * tileSize)
+      love.graphics.print(tostring(y), (x - 1) * tileSize, (y - 1) * tileSize + 12)
     end
   end
 end
