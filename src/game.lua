@@ -13,7 +13,7 @@ local Player = require 'src.player'
 local Game = class('Game')
 
 function Game:initialize()
-  Map:initialize(20, 20)
+  Map:initialize(8, 5)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
   Player:initialize(vector(5, 5))
 
@@ -26,13 +26,10 @@ end
 
 function Game:update(dt)
   -- Check for behavior first
-  Map:applyEntityPositionsToGrid(self.Entities)
+  Map:bindEntitiesToGrid(self.Entities)
   Player:update(dt)
   -- Then update the turns
   -- TODO: add Queuing / turn based actions here 
-end
-
-function Game:printDebugString()
 end
 
 function Game:draw(bool)
@@ -44,7 +41,7 @@ end
 function Game:drawDebug(bool)
   if not bool then return end
   Player:drawDebug()
-  Map:drawDebug()
+  Map:drawDebug({'map', 'outline'})
 end
 
 function Game:keypressed(key)

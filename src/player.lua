@@ -1,6 +1,9 @@
+-- utils
+local vectorUtils = require 'utils.vectorUtils'
+
 -- constants
-local movingPowerDecrement = 1
-local consumingPowerIncrement = 1
+local powerDecrement = 1
+local zeroVector = vectorUtils.getZeroVector()
 
 -- libs
 local class = require 'libs.middleclass'
@@ -8,17 +11,16 @@ local vector = require 'libs.vector'
 
 -- src
 local Tween = require 'src.tween'
---
 
 local Player = class('Player')
 
 function Player:initialize(spawnVector)
-  self.position = spawnVector
   self.drawPosition = spawnVector * tileSize
-  self.moveDuration = 0.05
-  self.tween = Tween:new()
+  self.moveDuration = 0.2
+  self.position = spawnVector
   self.power = 5
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
+  self.tween = Tween:new()
 end
 
 function Player:addPower(add)
@@ -47,7 +49,7 @@ end
 
 function Player:drawDebug()
   local x, y = self.drawPosition.x, self.drawPosition.y
-  -- TODO: replace with sprites
+  love.graphics.setColor(255,120,120)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 
@@ -65,13 +67,14 @@ function Player:handleKeys(key)
     delta.x = delta.x + 1
   end
 
+  -- TODO: replace with actions and queuing
   if key == 'w' or key == 's' or key == 'a' or key == 'd' then
-    self:removePower(movingPowerDecrement)
+    self:removePower(powerDecrement)
   end
 
   if delta ~= vector(0, 0) then
-      print(delta)
-      self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
+
+    self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
   end
 
   self.position = self.position + delta

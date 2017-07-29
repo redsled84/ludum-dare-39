@@ -1,5 +1,8 @@
+-- utils
+local vectorUtils = require 'utils.vectorUtils'
+
 -- constants
---
+local zeroVector = vectorUtils.getZeroVector()
 
 -- libs
 local class = require 'libs.middleclass'
@@ -37,13 +40,15 @@ function Map:initializeGrid()
   end
 end
 
-local zeroVector = vector(0, 0)
-function Map:applyEntityPositionsToGrid(entities)
+function Map:bindEntitiesToGrid(entities)
   for i = 1, #entities do
     local entity = entities[i]
     -- Assure that the entity stays within the Map, otherwise there will be indexing errors
-    local delta = self:bindPositionToBounds(entity.position)
-    entity.position = entity.position + delta
+    local deltaPos = self:bindPositionToBounds(entity.position)
+    local deltaDrawPos = self:bindPositionToBounds(entity.drawPosition / tileSize)
+    
+    entity.position = entity.position + deltaPos
+    entity.drawPosition = entity.drawPosition + deltaDrawPos
   end
 end
 
@@ -68,24 +73,32 @@ end
 function Map:entityIsInsideBounds(position)
   return position.x >= 1
     and position.y >= 1
-    and position.x <= self.gridWidth
-    and position.x <= self.gridHeight
+    and position.x < self.gridWidth
+    and position.y < self.gridHeight
 end
 
 function Map:drawDebug()
+  self:drawMapDebug()
+  self:drawGridDebug('fill')
+end
+
+function Map:drawMapDebug()
+  love.graphics.setColor(35, 120, 255)
+  love.graphics.rectangle('line', tileSize, tileSize,
+    self.gridWidth * tileSize, self.gridHeight * tileSize)
+end
+
+function Map:drawGridDebug(drawType)
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do
       local num = self.Grid[y][x]
-      love.graphics.setColor(255, 255, 255, 100)
-      love.graphics.rectangle('line', x * tileSize, y * tileSize, tileSize, tileSize)
-      love.graphics.setColor(0, 255, 255, 180)
-      love.graphics.print(tostring(x), x * tileSize, y * tileSize)
-      love.graphics.print(tostring(y), x * tileSize, y * tileSize + 12)
+      local position = vector(x * tileSize, y * tileSize)
 
-      if num == 2 then
-        love.graphics.setColor(150, 0, 150, 255)
-        love.graphics.rectangle('fill', x * tileSize, y * tileSize, tileSize, tileSize)
-      end
+      love.graphics.setColor(255, 255, 255, 45)
+      love.graphics.rectangle(drawType, position.x, position.y, tileSize, tileSize)
+      love.graphics.setColor(255, 255, 60, 120)
+      love.graphics.print(tostring(x), position.x, position.y)
+      love.graphics.print(tostring(y), position.x, position.y + 12)
     end
   end
 end
