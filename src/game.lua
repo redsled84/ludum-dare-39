@@ -26,7 +26,8 @@ end
 
 function Game:update(dt)
   -- Check for behavior first
-  -- Map:applyEntityPositionsToGrid(self.Entities)
+  Map:applyEntityPositionsToGrid(self.Entities)
+  Player:update(dt)
   -- Then update the turns
   -- TODO: add Queuing / turn based actions here 
 end
