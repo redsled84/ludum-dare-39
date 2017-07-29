@@ -1,3 +1,8 @@
+-- generate 3 randoms b/c programmer superstition :-P
+math.random()
+math.random()
+math.random()
+
 -- src
 local Game = require 'src.game'
 

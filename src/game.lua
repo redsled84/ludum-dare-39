@@ -20,37 +20,47 @@ local vector = require 'libs.vector'
 
 -- TODO: implement animations
 -- src
+local Crystal = require 'src.crystal'
 local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
 
 local Game = class('Game')
 
-local function findSpawnPosition()
-  local spawnPosition = vector(0,0)
-  local continueLooping = true
-  Map:loopGrid(function(x, y, val)
+local function getRandomFloorPosition()
+  local attempts = 0
+  local maxAttempts = 100
+  repeat
+    local x, y = math.random(1, Map.gridWidth), math.random(1, Map.gridHeight)
+    local val = Map:getGridValue(x, y)
     if val == 0 then
-      spawnPosition = vector(x, y)
-      continueLooping = false
+      return vector(x, y) 
+    else
+      attempts = attempts + 1
     end
-  end, continueLooping)
-  return spawnPosition
+  until attempts >= maxAttempts
 end
 
 function Game:initialize()
   local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
   Map:initialize(rogueMap, gridWidth, gridHeight)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
-  local spawnPosition = findSpawnPosition()
+  local spawnPosition = getRandomFloorPosition()
   Player:initialize(spawnPosition)
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
-  self.Entities = {
-    Player,
-  }
+  self.Items = {}
   self.state = 'game_start'
+
+  local nCrystals = math.random(1, 3)
+  for i = 1, nCrystals do
+    local position = getRandomFloorPosition()
+    local strength = 8
+    table.insert(self.Items, Crystal:new(position, strength))
+  end
+
+  self.Entities = {Player, unpack(self.Items)}
 end
 
 function Game:update(dt)
@@ -58,9 +68,8 @@ function Game:update(dt)
   Game:checkState()
 
   if self.state ~= 'game_over' then
-    -- TODO: Loop over Entities and link them to the Actions queue
     -- Player:update(dt)
-
+    Player:checkItems(self.Items)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
@@ -82,6 +91,7 @@ function Game:draw(bool)
     cam:attach()
     Map:drawLayer('floor')
     Player:draw()
+    self:drawItems(true)
     Map:drawLayer('wall')
     cam:detach()
     HUD:draw(Player)
@@ -90,6 +100,14 @@ function Game:draw(bool)
     love.graphics.setColor(255,0,0)
     love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
+  end
+end
+
+function Game:drawItems(bool)
+  if not bool then return end
+  for i = 1, #self.Items do
+    local item = self.Items[i]
+    item:draw()
   end
 end
 

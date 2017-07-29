@@ -2,7 +2,7 @@
 local vectorUtils = require 'utils.vectorUtils'
 
 -- constants
-local powerDecrement = .01
+local powerDecrement = 1
 local zeroVector = vectorUtils.getZeroVector()
 
 -- libs
@@ -11,7 +11,7 @@ local vector = require 'libs.vector'
 local wf = require 'libs.windfield'
 
 -- src
-local Tween = require 'src.tween'
+-- local Tween = require 'src.tween'
 
 local Player = class('Player')
 
@@ -21,7 +21,9 @@ function Player:initialize(spawnVector)
   self.position = spawnVector
   self.power = 20
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
-  self.tween = Tween:new()
+  -- self.tween = Tween:new()
+  self.item = nil
+  self.hasItem = false
 end
 
 function Player:addPower(add)
@@ -51,6 +53,17 @@ function Player:updateTween(dt)
   end
 end
 
+function Player:checkItems(items)
+  for i = 1, #items do
+    local item = items[i]
+    if item.position == self.position and not self.hasItem and not item.pickedUp then
+      item.pickedUp = true
+      self.hasItem = true
+      self.item = item
+    end
+  end
+end
+
 -- `tileSize` was declared globally in Game, so we can use it here without defining it in the file
 function Player:draw()
   local x, y = self.drawPosition.x, self.drawPosition.y
@@ -68,7 +81,7 @@ function Player:drawDebug(bool)
 end
 
 function Player:handleKeys(key, Map, Events)
-  if self.tween:inProgress() then return end
+  -- if self.tween:inProgress() then return end
 
   local delta = vector(0, 0)
   if key == 'w' then
@@ -79,11 +92,55 @@ function Player:handleKeys(key, Map, Events)
     delta.x = delta.x - 1
   elseif key == 'd' then
     delta.x = delta.x + 1
+  elseif key == 'f' then
+    self:useItem()
+  elseif key == 'e' then
+    self:dropItem(Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
     self:setPosition(delta)
+    -- self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self:removePower(powerDecrement)
+  end
+end
+
+function Player:useItem()
+  if self.hasItem then
+    self:addPower(self.item:getPower())
+    self.item:setPower(0)
+    self.item = nil
+    self.hasItem = false
+  end
+end
+
+function Player:dropItem(Map)
+  if self.hasItem and self.item.pickedUp then
+    local positions = {
+      Map:getGridValue(self.position.x, self.position.y - 1),
+      Map:getGridValue(self.position.x, self.position.y + 1),
+      Map:getGridValue(self.position.x + 1, self.position.y),
+      Map:getGridValue(self.position.x - 1, self.position.y)
+    }
+
+    self.item.pickedUp = false
+    self.hasItem = false
+
+    for i = 1, #positions do
+      local val = positions[i]
+      if val == 0 then
+        local temp = self.position
+        if i == 1 then
+          self.item:setPosition(self.position.x, self.position.y - 1)
+        elseif i == 2 then
+          self.item:setPosition(self.position.x, self.position.y + 1)
+        elseif i == 3 then
+          self.item:setPosition(self.position.x + 1, self.position.y)
+        elseif i == 4 then
+          self.item:setPosition(self.position.x - 1, self.position.y)
+        end
+      end
+    end
   end
 end
 
