@@ -69,7 +69,6 @@ function Game:update(dt)
 
   if self.state ~= 'game_over' then
     -- Player:update(dt)
-    Player:checkItems(self.Items)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
@@ -125,7 +124,7 @@ function Game:keypressed(key)
     love.event.quit()
   end
 
-  Player:handleKeys(key, Map)
+  Player:handleKeys(key, Map, self.Items)
 end
 
 return Game

@@ -1,3 +1,4 @@
+math.randomseed(os.time())
 -- generate 3 randoms b/c programmer superstition :-P
 math.random()
 math.random()

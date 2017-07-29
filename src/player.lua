@@ -53,9 +53,9 @@ function Player:updateTween(dt)
   end
 end
 
-function Player:checkItems(items)
-  for i = 1, #items do
-    local item = items[i]
+function Player:checkItems(Items)
+  for i = 1, #Items do
+    local item = Items[i]
     if item.position == self.position and not self.hasItem and not item.pickedUp then
       item.pickedUp = true
       self.hasItem = true
@@ -80,7 +80,7 @@ function Player:drawDebug(bool)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 
-function Player:handleKeys(key, Map, Events)
+function Player:handleKeys(key, Map, Items)
   -- if self.tween:inProgress() then return end
 
   local delta = vector(0, 0)
@@ -93,7 +93,11 @@ function Player:handleKeys(key, Map, Events)
   elseif key == 'd' then
     delta.x = delta.x + 1
   elseif key == 'f' then
-    self:useItem()
+    if self.hasItem then
+      self:useItem()
+    else
+      self:checkItems(Items)
+    end
   elseif key == 'e' then
     self:dropItem(Map)
   end
