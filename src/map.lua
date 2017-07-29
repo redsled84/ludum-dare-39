@@ -36,11 +36,12 @@ function Map:initializeGrid()
   end
 end
 
--- function Map:applyEntityPositionsToGrid(entities)
---   for i = 1, #entites do
-    
---   end
--- end
+function Map:applyEntityPositionsToGrid(entities)
+  for i = 1, #entities do
+    local entity = entities[i]
+
+  end
+end
 
 function Map:drawDebug()
   love.graphics.setColor(255,255,255)

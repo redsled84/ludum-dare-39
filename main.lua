@@ -25,7 +25,7 @@ end
 
 function love.draw()
   Game:draw(true)
-  Game:drawDebug(false)
+  Game:drawDebug(true)
 end
 
 function love.keypressed(key)
