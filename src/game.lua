@@ -7,28 +7,27 @@ states = {
   splash_menu = 'splash_menu',
   level_change = 'level_change'
 }
+local gridWidth = 18
+local gridHeight = 18
 
 -- libs
 local Cam = require 'libs.camera'
 local cam = Cam(0, 0)
 local class = require 'libs.middleclass'
+local inspect = require 'libs.inspect'
 local ROT = require 'libs.rotLove.rot'
 local vector = require 'libs.vector'
 
 -- TODO: implement animations
 -- src
+Events = require 'src.events'
 local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
 
 local Game = class('Game')
 
-function Game:initialize()
-  local gridWidth = 15
-  local gridHeight = 15
-  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
-  Map:initialize(rogueMap, gridWidth, gridHeight)
-  -- The spawn vector is based on the map grid position not the actual pixel positions...
+local function findSpawnPosition()
   local spawnPosition = vector(0,0)
   local continueLooping = true
   Map:loopGrid(function(x, y, val)
@@ -37,7 +36,17 @@ function Game:initialize()
       continueLooping = false
     end
   end, continueLooping)
+  return spawnPosition
+end
+
+function Game:initialize()
+  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
+  Map:initialize(rogueMap, gridWidth, gridHeight)
+  -- The spawn vector is based on the map grid position not the actual pixel positions...
+  local spawnPosition = findSpawnPosition()
   Player:initialize(spawnPosition)
+
+  Events:initialize()
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
@@ -52,6 +61,7 @@ function Game:update(dt)
   Game:checkState()
 
   if self.state ~= 'game_over' then
+    -- TODO: Loop over Entities and link them to the Actions queue
     Player:update(dt)
 
     local camX, camY = Player:getPixelPosition()
@@ -60,7 +70,9 @@ function Game:update(dt)
   Map:bindEntitiesToGrid(self.Entities)
 
   -- Then update the turns
-  -- TODO: add Queuing / turn based actions here 
+  -- TODO: add Queuing / turn based actions here
+  print(inspect(Events.Queue))
+  Events:stepEvents(dt)
 end
 
 function Game:checkState()
@@ -101,7 +113,12 @@ function Game:keypressed(key)
     love.event.quit()
   end
 
-  Player:handleKeys(key, Map)
+  if key == 'r' then
+    local temp = function(str) print(str) end
+    Events:add(temp, {'Action Completed'}, 2)
+  end
+
+  Player:handleKeys(key, Map, Events)
 end
 
 return Game

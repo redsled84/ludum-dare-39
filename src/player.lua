@@ -17,7 +17,7 @@ local Player = class('Player')
 
 function Player:initialize(spawnVector)
   self.drawPosition = spawnVector * tileSize
-  self.moveDuration = 0.05
+  self.moveDuration = 0.5
   self.position = spawnVector
   self.power = 20
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
@@ -67,7 +67,7 @@ function Player:drawDebug(bool)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 
-function Player:handleKeys(key, Map)
+function Player:handleKeys(key, Map, Events)
   if self.tween:inProgress() then return end
 
   local delta = vector(0, 0)
@@ -82,8 +82,7 @@ function Player:handleKeys(key, Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
-    self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
-    self.position = self.position + delta
+    Events:add(self.movePosition, {delta}, self.moveDuration)
     self:removePower(powerDecrement)
   end
 end
@@ -92,6 +91,11 @@ function Player:checkNextPosition(delta, Map)
   local temp = delta + self.position
   local val = Map:getGridValue(temp.x, temp.y)
   return val == 1
+end
+
+function Player.movePosition(delta)
+  Player.tween:start(tileSize * Player.position, tileSize * (Player.position + delta), Player.moveDuration)
+  Player.position = Player.position + delta
 end
 
 return Player
