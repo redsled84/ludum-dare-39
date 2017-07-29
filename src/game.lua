@@ -24,13 +24,20 @@ local Player = require 'src.player'
 local Game = class('Game')
 
 function Game:initialize()
-  local gridWidth = 30
-  local gridHeight = 30
+  local gridWidth = 15
+  local gridHeight = 15
   local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
   Map:initialize(rogueMap, gridWidth, gridHeight)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
-  local firstRoom = rogueMap:getRooms()[1]
-  Player:initialize(vector(5, 5))
+  local spawnPosition = vector(0,0)
+  local continueLooping = true
+  Map:loopGrid(function(x, y, val)
+    if val == 0 then
+      spawnPosition = vector(x, y)
+      continueLooping = false
+    end
+  end, continueLooping)
+  Player:initialize(spawnPosition)
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
@@ -46,6 +53,7 @@ function Game:update(dt)
 
   if self.state ~= 'game_over' then
     Player:update(dt)
+
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
@@ -87,6 +95,9 @@ end
 
 function Game:keypressed(key)
   if key == 'escape' then
+    love.event.quit('restart')
+  end
+  if key == 'q' then
     love.event.quit()
   end
 

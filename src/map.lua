@@ -93,7 +93,7 @@ function Map:drawLayer(layerString)
       local offsetY = val == 1 and -11 or 0
       love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
     end
-  end)
+  end, true)
 end
 
 function Map:getGridValue(x, y)
@@ -101,9 +101,10 @@ function Map:getGridValue(x, y)
   return self.Grid[y][x]
 end
 
-function Map:loopGrid(f)
+function Map:loopGrid(f, continue)
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do
+      if not continue then break end
       local val = Map:getGridValue(x, y)
       f(x, y, val)
     end
