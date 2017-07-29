@@ -2,7 +2,7 @@
 local vectorUtils = require 'utils.vectorUtils'
 
 -- constants
-local powerDecrement = 1
+local powerDecrement = .01
 local zeroVector = vectorUtils.getZeroVector()
 
 -- libs
@@ -17,7 +17,7 @@ local Player = class('Player')
 
 function Player:initialize(spawnVector)
   self.drawPosition = spawnVector * tileSize
-  self.moveDuration = 0.2
+  self.moveDuration = 0.05
   self.position = spawnVector
   self.power = 20
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
