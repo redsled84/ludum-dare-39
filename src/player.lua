@@ -8,6 +8,7 @@ local zeroVector = vectorUtils.getZeroVector()
 -- libs
 local class = require 'libs.middleclass'
 local vector = require 'libs.vector'
+local wf = require 'libs.windfield'
 
 -- src
 local Tween = require 'src.tween'
@@ -18,7 +19,7 @@ function Player:initialize(spawnVector)
   self.drawPosition = spawnVector * tileSize
   self.moveDuration = 0.2
   self.position = spawnVector
-  self.power = 5
+  self.power = 20
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
   self.tween = Tween:new()
 end
@@ -81,11 +82,16 @@ function Player:handleKeys(key)
   end
 
   if delta ~= vector(0, 0) then
-
     self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
   end
 
   self.position = self.position + delta
+end
+
+function Player:checkNextPosition(Map, delta)
+  Map:loopGrid(function(x, y, val)
+    
+  end)
 end
 
 return Player

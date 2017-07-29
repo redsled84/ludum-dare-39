@@ -3,6 +3,10 @@ local vectorUtils = require 'utils.vectorUtils'
 
 -- constants
 local zeroVector = vectorUtils.getZeroVector()
+local sprites = {
+  floor = love.graphics.newImage('sprites/floor3.png'),
+  wall = love.graphics.newImage('sprites/wall.png'),
+}
 
 -- libs
 local class = require 'libs.middleclass'
@@ -14,8 +18,8 @@ local vector = require 'libs.vector'
 
 local Map = class('Map')
 
-function Map:initialize(gridWidth, gridHeight)
-  self.Grid = {}
+function Map:initialize(dungeon, gridWidth, gridHeight)
+  self.Grid = dungeon._map
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
 
@@ -77,7 +81,24 @@ function Map:entityIsInsideBounds(position)
     and position.y < self.gridHeight
 end
 
-function Map:drawDebug()
+function Map:drawGrid()
+  print(#self.Grid)
+  for y = 1, self.gridHeight do
+    for x = 1, self.gridWidth do
+      local val = self.Grid[y][x]
+      local position = vector(x * tileSize, y * tileSize)
+      love.graphics.setColor(255,255,255)
+      if val == 0 then
+        love.graphics.draw(sprites['floor'], position.x, position.y)
+      elseif val == 1 then
+        love.graphics.draw(sprites['wall'], position.x, position.y)
+      end
+    end
+  end
+end
+
+function Map:drawDebug(bool)
+  if not bool then return end
   self:drawMapDebug()
   self:drawGridDebug('fill')
 end

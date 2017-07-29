@@ -21,8 +21,8 @@ function love.update(dt)
 end
 
 function love.draw()
+  Game:drawDebug(false)
   Game:draw(true)
-  Game:drawDebug(true)
 end
 
 function love.keypressed(key)
