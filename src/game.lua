@@ -68,7 +68,7 @@ function Game:update(dt)
   Game:checkState()
 
   if self.state ~= 'game_over' then
-    -- Player:update(dt)
+    Player:update(dt)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
@@ -89,13 +89,14 @@ function Game:draw(bool)
   if self.state == 'game_start' then
     cam:attach()
     Map:drawLayer('floor')
+    self:drawShadows()
     Player:draw()
     self:drawItems(true)
     Map:drawLayer('wall')
     cam:detach()
     HUD:draw(Player)
   elseif self.state == 'game_over' then
-    -- TODO: change game over screen with player animation dying and restarting game
+    -- TODO: change game over screen with player dying animation and restarting game
     love.graphics.setColor(255,0,0)
     love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
@@ -107,6 +108,15 @@ function Game:drawItems(bool)
   for i = 1, #self.Items do
     local item = self.Items[i]
     item:draw()
+  end
+end
+
+function Game:drawShadows(bool)
+  for i = 1, #self.Entities do
+    local entity = self.Entities[i]
+    love.graphics.setColor(10, 10, 10, 100)
+    local x, y = entity.drawPosition.x, entity.drawPosition.y
+    love.graphics.ellipse('fill', x + tileSize / 2, y + tileSize - 4, 18, 6)
   end
 end
 

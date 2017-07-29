@@ -20,10 +20,17 @@ function Player:initialize(spawnVector)
   self.moveDuration = 0.5
   self.position = spawnVector
   self.power = 20
-  self.sprite = love.graphics.newImage('sprites/left2-2.png')
   -- self.tween = Tween:new()
   self.item = nil
   self.hasItem = false
+  self.dir = 'left'
+  self.sprites = {
+    idle = love.graphics.newImage('sprites/left.png'),
+    run = love.graphics.newImage('sprites/left_run.png')
+  }
+  self.animationDuration = 0.5
+  self.animationTimer = 0
+  self.startAnimation = false
 end
 
 function Player:addPower(add)
@@ -43,7 +50,20 @@ function Player:getPixelPosition()
 end
 
 function Player:update(dt)
+  self:updateAnimationTimer(dt)
   -- Player:updateTween(dt)
+end
+
+-- Replace with modular timers
+function Player:updateAnimationTimer(dt)
+  if self.startAnimation then
+    if self.animationTimer < self.animationDuration then
+      self.animationTimer = self.animationTimer + dt
+    else
+      self.animationTimer = 0
+      self.startAnimation = false
+    end
+  end
 end
 
 function Player:updateTween(dt)
@@ -66,11 +86,23 @@ end
 
 -- `tileSize` was declared globally in Game, so we can use it here without defining it in the file
 function Player:draw()
+
   local x, y = self.drawPosition.x, self.drawPosition.y
-  -- TODO: replace with sprites
   love.graphics.setColor(255,255,255)
   -- TODO: use variable for height to subtract
-  love.graphics.draw(self.sprite, x, y - 16)
+  if self.animationTimer == 0 then
+    if self.dir == 'left' then
+      love.graphics.draw(self.sprites['idle'], x, y)
+    elseif self.dir == 'right' then
+      love.graphics.draw(self.sprites['idle'], x + tileSize, y, 0, -1, 1)
+    end
+  else
+    if self.dir == 'left' then
+      love.graphics.draw(self.sprites['run'], x, y - 16)
+    elseif self.dir == 'right' then
+      love.graphics.draw(self.sprites['run'], x + tileSize, y - 16, 0, -1, 1)
+    end
+  end
 end
 
 function Player:drawDebug(bool)
@@ -90,8 +122,10 @@ function Player:handleKeys(key, Map, Items)
     delta.y = delta.y + 1
   elseif key == 'a' then
     delta.x = delta.x - 1
+    self.dir = 'left'
   elseif key == 'd' then
     delta.x = delta.x + 1
+    self.dir = 'right'
   elseif key == 'f' then
     if self.hasItem then
       self:useItem()
@@ -103,6 +137,11 @@ function Player:handleKeys(key, Map, Items)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
+    if self.startAnimation then
+      self.animationTimer = 0
+    else
+      self.startAnimation = true
+    end
     self:setPosition(delta)
     -- self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self:removePower(powerDecrement)
