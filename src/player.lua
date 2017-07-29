@@ -7,6 +7,7 @@ local class = require 'libs.middleclass'
 local vector = require 'libs.vector'
 
 -- src
+local Tween = require 'src.tween'
 --
 
 local Player = class('Player')
@@ -14,9 +15,10 @@ local Player = class('Player')
 function Player:initialize(spawnVector)
   self.position = spawnVector
   self.drawPosition = spawnVector * tileSize
+  self.moveDuration = 0.05
+  self.tween = Tween:new()
   self.power = 5
   self.sprite = love.graphics.newImage('sprites/left2-2.png')
-  self.movementSpeed = 30
 end
 
 function Player:addPower(add)
@@ -28,47 +30,9 @@ function Player:removePower(dec)
 end
 
 function Player:update(dt)
-  local deltaPosition = vector((self.position.x - self.drawPosition.x / tileSize),
-    self.position.y - self.drawPosition.y / tileSize)
-
-  if deltaPosition.x ~= 0 or deltaPosition.y ~= 0 then
-    self.moving = true
-  end
-
-  print(deltaPosition)
-
-  self:tweenDrawPosition(deltaPosition, dt)
-end
-
-local zeroVector = vector(0, 0)
-function Player:tweenDrawPosition(deltaPosition, dt)
-  if self.moving then
-    if deltaPosition.x > 0 then
-      if self.drawPosition > self.position * tileSize then
-        self.moving = false
-        return
-      end
-      self.drawPosition.x = self.drawPosition.x + self.movementSpeed * dt
-    elseif deltaPosition.x < 0 then
-      if self.drawPosition < self.position * tileSize then
-        self.moving = false
-        return
-      end
-      self.drawPosition.x = self.drawPosition.x - self.movementSpeed * dt
-    end
-    if deltaPosition.y > 0 then
-      if self.drawPosition < self.position * tileSize then
-        self.moving = false
-        return
-      end
-      self.drawPosition.y = self.drawPosition.y + self.movementSpeed * dt
-    elseif deltaPosition.y < 0 then
-      if self.drawPosition > self.position * tileSize then
-        self.moving = false
-        return
-      end
-      self.drawPosition.y = self.drawPosition.y - self.movementSpeed * dt
-    end
+  if self.tween:inProgress() then
+    self.tween:update(dt)
+    self.drawPosition = self.tween:position()
   end
 end
 
@@ -77,7 +41,7 @@ function Player:draw()
   local x, y = self.drawPosition.x, self.drawPosition.y
   -- TODO: replace with sprites
   love.graphics.setColor(255,255,255)
-  -- TODO: use variable for height to subtract 
+  -- TODO: use variable for height to subtract
   love.graphics.draw(self.sprite, x, y - 16)
 end
 
@@ -88,7 +52,7 @@ function Player:drawDebug()
 end
 
 function Player:handleKeys(key)
-  if self.moving then return end
+  if self.tween:inProgress() then return end
 
   local delta = vector(0, 0)
   if key == 'w' then
@@ -101,8 +65,13 @@ function Player:handleKeys(key)
     delta.x = delta.x + 1
   end
 
-  if key == 'w' or key == 's' or key == 'a' or key == 'd' then 
+  if key == 'w' or key == 's' or key == 'a' or key == 'd' then
     self:removePower(movingPowerDecrement)
+  end
+
+  if delta ~= vector(0, 0) then
+      print(delta)
+      self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
   end
 
   self.position = self.position + delta
