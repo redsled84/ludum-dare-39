@@ -7,6 +7,10 @@ local sprites = {
   floor = love.graphics.newImage('sprites/floor3.png'),
   wall = love.graphics.newImage('sprites/wall.png'),
 }
+local spriteNums = {
+  floor = 0,
+  wall = 1,
+}
 
 -- libs
 local class = require 'libs.middleclass'
@@ -81,18 +85,27 @@ function Map:entityIsInsideBounds(position)
     and position.y < self.gridHeight
 end
 
-function Map:drawGrid()
-  print(#self.Grid)
+function Map:drawLayer(layerString)
+  self:loopGrid(function(x, y, val)
+    local position = vector(x * tileSize, y * tileSize)
+    love.graphics.setColor(255,255,255)
+    if val == spriteNums[layerString] then
+      local offsetY = val == 1 and -11 or 0
+      love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
+    end
+  end)
+end
+
+function Map:getGridValue(x, y)
+  if x <= 0 or y <= 0 or y > self.gridHeight or x > self.gridWidth then return end
+  return self.Grid[y][x]
+end
+
+function Map:loopGrid(f)
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do
-      local val = self.Grid[y][x]
-      local position = vector(x * tileSize, y * tileSize)
-      love.graphics.setColor(255,255,255)
-      if val == 0 then
-        love.graphics.draw(sprites['floor'], position.x, position.y)
-      elseif val == 1 then
-        love.graphics.draw(sprites['wall'], position.x, position.y)
-      end
+      local val = Map:getGridValue(x, y)
+      f(x, y, val)
     end
   end
 end

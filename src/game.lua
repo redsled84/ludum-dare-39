@@ -9,6 +9,8 @@ states = {
 }
 
 -- libs
+local Cam = require 'libs.camera'
+local cam = Cam(0, 0)
 local class = require 'libs.middleclass'
 local ROT = require 'libs.rotLove.rot'
 local vector = require 'libs.vector'
@@ -24,8 +26,10 @@ local Game = class('Game')
 function Game:initialize()
   local gridWidth = 30
   local gridHeight = 30
-  Map:initialize(ROT.Map.Brogue(gridWidth, gridHeight):create(), gridWidth, gridHeight)
+  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
+  Map:initialize(rogueMap, gridWidth, gridHeight)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
+  local firstRoom = rogueMap:getRooms()[1]
   Player:initialize(vector(5, 5))
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
@@ -42,6 +46,8 @@ function Game:update(dt)
 
   if self.state ~= 'game_over' then
     Player:update(dt)
+    local camX, camY = Player:getPixelPosition()
+    cam:lookAt(camX, camY)
   end
   Map:bindEntitiesToGrid(self.Entities)
 
@@ -59,20 +65,23 @@ function Game:draw(bool)
   if not bool then return end
 
   if self.state == 'game_start' then
-    Map:drawGrid()
+    cam:attach()
+    Map:drawLayer('floor')
     Player:draw()
+    Map:drawLayer('wall')
+    cam:detach()
     HUD:draw(Player)
   elseif self.state == 'game_over' then
     -- TODO: change game over screen with player animation dying and restarting game
     love.graphics.setColor(255,0,0)
-    love.graphics.print('You Lost!',
+    love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
   end
 end
 
 function Game:drawDebug(bool)
-  if not bool and self.state ~= 'game_over' then return end
-  Player:drawDebug()
+  if not bool or self.state ~= 'game_over' then return end
+  Player:drawDebug(false)
   Map:drawDebug(false)
 end
 
@@ -81,7 +90,7 @@ function Game:keypressed(key)
     love.event.quit()
   end
 
-  Player:handleKeys(key)
+  Player:handleKeys(key, Map)
 end
 
 return Game

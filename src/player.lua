@@ -36,6 +36,10 @@ function Player:getPower()
   return self.power
 end
 
+function Player:getPixelPosition()
+  return self.drawPosition.x, self.drawPosition.y
+end
+
 function Player:update(dt)
   Player:updateTween(dt)  
 end
@@ -56,13 +60,14 @@ function Player:draw()
   love.graphics.draw(self.sprite, x, y - 16)
 end
 
-function Player:drawDebug()
+function Player:drawDebug(bool)
+  if not bool then return end 
   local x, y = self.drawPosition.x, self.drawPosition.y
   love.graphics.setColor(255,120,120)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 
-function Player:handleKeys(key)
+function Player:handleKeys(key, Map)
   if self.tween:inProgress() then return end
 
   local delta = vector(0, 0)
@@ -81,17 +86,16 @@ function Player:handleKeys(key)
     self:removePower(powerDecrement)
   end
 
-  if delta ~= vector(0, 0) then
+  if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
     self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
+    self.position = self.position + delta
   end
-
-  self.position = self.position + delta
 end
 
-function Player:checkNextPosition(Map, delta)
-  Map:loopGrid(function(x, y, val)
-    
-  end)
+function Player:checkNextPosition(delta, Map)
+  local temp = delta + self.position
+  local val = Map:getGridValue(temp.x, temp.y)
+  return val == 1
 end
 
 return Player
