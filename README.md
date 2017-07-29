@@ -8,11 +8,12 @@ Untitled/ :
   conf.lua
   README.md
   libs/ :
-    rotLove/
+    rotLove/ (roguelike library)
+    windfield/ (love2d physics wrapper)
     camera.lua
     vector.lua
-    middleclass.lua
-    inspect.lua
+    middleclass.lua (OOP library)
+    inspect.lua (humanizer library for tables)
   src/ :
     game.lua
     player.lua
