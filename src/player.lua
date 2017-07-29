@@ -81,14 +81,10 @@ function Player:handleKeys(key, Map)
     delta.x = delta.x + 1
   end
 
-  -- TODO: replace with actions and queuing
-  if key == 'w' or key == 's' or key == 'a' or key == 'd' then
-    self:removePower(powerDecrement)
-  end
-
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
     self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self.position = self.position + delta
+    self:removePower(powerDecrement)
   end
 end
 
