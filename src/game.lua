@@ -1,5 +1,5 @@
 -- constants
-tileSize = 32
+tileSize = 16
 states = {
   game_start = 'game_start',
   game_over = 'game_over',
@@ -32,15 +32,16 @@ local Player = require 'src.player'
 local Game = class('Game')
 
 function Game:initialize(firstTime)
-  lightWorld = LightWorld({
-    ambient = {45, 45, 45},
-    refractionStrength = 1.0,
-    reflectionVisibility = 0.95,
-    shadowBlur = 0.0
-  })
+  love.graphics.setDefaultFilter('nearest', 'nearest')
+  -- lightWorld = LightWorld({
+  --   ambient = {45, 45, 45},
+  --   refractionStrength = 1.0,
+  --   reflectionVisibility = 0.95,
+  --   shadowBlur = 0.0
+  -- })
 
-  lightPlayer = lightWorld:newLight(0, 0, 200, 150, 100, 235)
-  lightObjects = {}
+  -- lightPlayer = lightWorld:newLight(0, 0, 200, 150, 100, 235)
+  -- lightObjects = {}
 
   local grid = {
     {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -53,16 +54,8 @@ function Game:initialize(firstTime)
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
 
-  cells = {}
-
-  for y = 1, gridHeight do
-    for x = 1, gridWidth do
-      local val = grid[y][x]
-      if val == 1 then
-        cells[#cells+1] = Cell:new(vector(x * tileSize, y * tileSize))
-      end
-    end
-  end
+  self.Cells = {}
+  self:createCells(grid, gridWidth, gridHeight)
   
   Player:initialize(vector(0, 0))
   
@@ -75,7 +68,18 @@ function Game:initialize(firstTime)
 
   -- post_shader = PostShader()
   -- post_shader:toggleEffect("blur", 2.0, 2.0)
-  render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
+  -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
+end
+
+function Game:createCells(grid, gridWidth, gridHeight)
+  for y = 1, gridHeight do
+    for x = 1, gridWidth do
+      local val = grid[y][x]
+      if val == 1 then
+        self.Cells[#self.Cells+1] = Cell:new(vector(x * tileSize, y * tileSize))
+      end
+    end
+  end
 end
 
 function Game:update(dt)
@@ -85,12 +89,12 @@ function Game:update(dt)
 
     local camX, camY = Player.position.x, Player.position.y
     cam:lookAt(camX, camY)
+    cam:zoomTo(4, 4)
 
-    lightPlayer:setPosition(camX + tileSize / 2, camY + tileSize / 2)
-
-    lightWorld:update(dt)
-    local lx, ly = -cam.x + love.graphics.getWidth()/2, -cam.y + love.graphics.getHeight()/2
-    lightWorld:setTranslation(lx, ly)
+    -- lightPlayer:setPosition(camX + tileSize / 2, camY + tileSize / 2)
+    -- local lx, ly = -cam.x, -cam.y
+    -- lightWorld:setTranslation(lx, ly, 4)
+    -- lightWorld:update(dt)
 
     world:update(dt)
   end
@@ -114,21 +118,15 @@ function Game:draw(bool)
 
   if self.state == 'game_start' then
     cam:attach()
-    lightWorld:draw(function()
+    -- lightWorld:draw(function()
       Map:drawLayer('floor')
       Map:drawLayer('stair')
-      Map:drawLayer('wall_side')
+      Map:drawLayer('wall')
 
       self:drawItems(true)
       Player:draw()
-
-      Map:drawLayer('wall_top')
-    end)
-    for i = 1, #cells do
-      local cell = cells[i]
-      love.graphics.setColor(255,255,255)
-      love.graphics.rectangle('line', cell.position.x, cell.position.y, cell.width, cell.height)
-    end
+    -- end)
+    
     cam:detach()
     -- love.graphics.setCanvas()
     -- post_shader:drawWith(render_buffer)
@@ -156,6 +154,14 @@ function Game:drawDebug(bool)
   Player:drawDebug(true)
   Map:drawDebug(false)
   cam:detach()
+end
+
+function Game:drawCells()
+  for i = 1, #cells do
+    local cell = cells[i]
+    love.graphics.setColor(255,255,255)
+    love.graphics.rectangle('line', cell.position.x, cell.position.y, cell.width, cell.height)
+  end
 end
 
 function Game:keypressed(key)

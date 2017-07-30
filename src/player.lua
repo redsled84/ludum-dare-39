@@ -32,12 +32,12 @@ function Player:initialize(spawnVector)
   self.hasItem = false
   self.dir = 'left'
   self.sprites = {
-    idle = love.graphics.newImage('sprites/player_idle.png'),
-    run = love.graphics.newImage('sprites/player_run.png'),
-    crystal = love.graphics.newImage('sprites/crystal.png')
+    idle = love.graphics.newImage('sprites/player3-1.png'),
+    -- run = love.graphics.newImage('sprites/player_run.png'),
+    -- crystal = love.graphics.newImage('sprites/crystal.png')
   }
   self.finishedMap = false
-  self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize, tileSize)
+  self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
   self.speed = 100

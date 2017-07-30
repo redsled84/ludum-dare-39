@@ -4,15 +4,16 @@ local vectorUtils = require 'utils.vectorUtils'
 -- constants
 local zeroVector = vectorUtils.getZeroVector()
 local sprites = {
-  floor = love.graphics.newImage('sprites/floor_basic.png'),
-  wall_top = love.graphics.newImage('sprites/wall_top.png'),
-  wall_side = love.graphics.newImage('sprites/wall_side.png'),
+  floor = love.graphics.newImage('sprites/floor.png'),
+  wall = love.graphics.newImage('sprites/wall.png'),
   stair = love.graphics.newImage('sprites/stairs.png')
 }
+sprites['wall']:setFilter('nearest', 'nearest')
+sprites['floor']:setFilter('nearest', 'nearest')
+
 local spriteNums = {
   floor = 0,
-  wall_top = 1,
-  wall_side = 3,
+  wall = 1,
   stair = 4,
 }
 
@@ -100,14 +101,7 @@ function Map:drawLayer(layerString, playerPos)
     local position = vector(x * tileSize, y * tileSize)
     love.graphics.setColor(255,255,255)
     if val == spriteNums[layerString] then
-      local offsetY = (val == 3 or val == 1) and -11 or 0
-      if val == spriteNums['stair'] then
-        love.graphics.draw(sprites['floor'], position.x, position.y)
-      end
-      love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
-    end
-    if val == 2 and layerString == 'floor' then
-      love.graphics.draw(sprites['floor'], position.x, position.y)
+      love.graphics.draw(sprites[layerString], position.x, position.y)
     end
   end, true)
 end
