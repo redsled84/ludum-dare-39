@@ -27,10 +27,29 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
 
-  self:initializeGrid()
+  self.backgroundWalls = {}
+  self.foregroundWalls = {}
+
+  for y = 1, gridHeight do
+    local row = dungeon._map[y]
+    for x = 1, gridWidth do
+      local val = dungeon._map[y][x]
+      local valBelow
+      if y == gridHeight then
+        valBelow = val
+      else
+        valBelow = dungeon._map[y+1][x]
+      end
+      if val == 1 and valBelow == 0 or valBelow == 2 then
+        table.insert(self.backgroundWalls, vector(x, y))
+      elseif val == 1 and valBelow == 1 then
+        table.insert(self.foregroundWalls, vector(x, y))
+      end
+    end
+  end
 end
 
-function Map:initializeGrid()
+function Map:initializeEmptyGrid()
   -- Initialize an empty grid
   -- Our grid will look something like this:
   --  {
@@ -94,6 +113,23 @@ function Map:drawLayer(layerString)
       love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
     end
   end, true)
+end
+
+function Map:drawBackgroundWalls()
+  -- loop in reverse order
+  for i = #self.backgroundWalls, 1, -1 do
+    local position = self.backgroundWalls[i] * tileSize
+    love.graphics.setColor(255,255,255)
+    love.graphics.draw(sprites['wall'], position.x, position.y - 11)
+  end
+end
+
+function Map:drawForegroundWalls()
+  for i = 1, #self.foregroundWalls do
+    local position = self.foregroundWalls[i] * tileSize
+    love.graphics.setColor(255,255,255)
+    love.graphics.draw(sprites['wall'], position.x, position.y - 11)
+  end
 end
 
 function Map:getGridValue(x, y)

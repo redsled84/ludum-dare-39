@@ -89,10 +89,11 @@ function Game:draw(bool)
   if self.state == 'game_start' then
     cam:attach()
     Map:drawLayer('floor')
+    Map:drawBackgroundWalls()
     self:drawShadows()
     Player:draw()
     self:drawItems(true)
-    Map:drawLayer('wall')
+    Map:drawForegroundWalls()
     cam:detach()
     HUD:draw(Player)
   elseif self.state == 'game_over' then

@@ -28,7 +28,7 @@ function Player:initialize(spawnVector)
     idle = love.graphics.newImage('sprites/left.png'),
     run = love.graphics.newImage('sprites/left_run.png')
   }
-  self.animationDuration = 0.5
+  self.animationDuration = 0.25
   self.animationTimer = 0
   self.startAnimation = false
 end
