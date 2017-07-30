@@ -39,6 +39,7 @@ function Player:initialize(spawnVector)
   self.finishedMap = false
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize, tileSize)
   self.collider:setCollisionClass(self.name)
+  self.collider:setFixedRotation(true)
   self.speed = 100
 end
 
