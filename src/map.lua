@@ -24,6 +24,7 @@ local vector = require 'libs.vector'
 local Map = class('Map')
 
 function Map:initialize(dungeon, gridWidth, gridHeight)
+  self.Dungeon = dungeon
   self.Grid = dungeon._map
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
@@ -134,13 +135,57 @@ function Map:drawForegroundWalls()
 end
 
 function Map:getGridValue(x, y)
-  if x <= 0 or y <= 0 or y > self.gridHeight or x > self.gridWidth then return end
+  if self:safeCheck(x, y) then return end
   return self.Grid[y][x]
 end
 
 function Map:setGridValue(x, y, val)
-  if x <= 0 or y <= 0 or y > self.gridHeight or x > self.gridWidth then return end
+  if self:safeCheck(x, y) then return end
   self.Grid[y][x] = val
+end
+
+function Map:removeWall(x, y)
+  self:setGridValue(x, y, 0)
+end
+
+function Map:updateWalls()
+  self:loopGrid(function(x, y, val)
+    if val == 0 then
+      local i = self:getForegroundWall(x, y)
+      local j = self:getBackgroundWall(x, y)
+      if i then
+        
+        table.remove(self.foregroundWalls, i)
+      end
+      if j then
+        table.remove(self.backgroundWalls, j)
+      end
+    end
+  end, true)
+end
+
+function Map:getBackgroundWall(x, y)
+  for i = #self.backgroundWalls, 1, -1 do
+    local position = self.backgroundWalls[i]
+    if position.x == x and position.y == y then
+      return i
+    end
+  end
+  return false
+end
+
+function Map:getForegroundWall(x, y)
+  for i = #self.foregroundWalls, 1, -1 do
+    local position = self.foregroundWalls[i]
+    if position.x == x and position.y == y then
+      return i
+    end
+  end
+  return false
+end
+
+function Map:safeCheck(x, y)
+  return x <= 0 or y <= 0 or y > self.gridHeight or x > self.gridWidth
 end
 
 function Map:loopGrid(f, continue)
@@ -176,6 +221,8 @@ function Map:drawGridDebug(drawType)
       love.graphics.setColor(255, 255, 60, 120)
       love.graphics.print(tostring(x), position.x, position.y)
       love.graphics.print(tostring(y), position.x, position.y + 12)
+      love.graphics.setColor(255,0,0,120)
+      love.graphics.print(tostring(num), position.x + 18, position.y)
     end
   end
 end

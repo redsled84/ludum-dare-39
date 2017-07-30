@@ -68,10 +68,11 @@ function Game:update(dt)
   Game:checkState()
 
   if self.state ~= 'game_over' then
-    Player:update(dt)
+    Player:update(dt, Map)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
+  Map:updateWalls()
   Map:bindEntitiesToGrid(self.Entities)
 
   -- Then update the turns
@@ -94,6 +95,7 @@ function Game:draw(bool)
     cam:attach()
     Map:drawLayer('floor')
     self:drawShadows(true)
+    Player:drawLaser()
     Map:drawBackgroundWalls()
     self:drawItems(true)
     Player:draw()
@@ -106,6 +108,7 @@ function Game:draw(bool)
     love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
   end
+  self:drawDebug(true)
 end
 
 function Game:drawItems(bool)
@@ -128,9 +131,9 @@ function Game:drawShadows(bool)
 end
 
 function Game:drawDebug(bool)
-  if not bool or self.state ~= 'game_over' then return end
-  Player:drawDebug(false)
-  Map:drawDebug(false)
+  if not bool and self.state ~= 'game_over' then return end
+  Player:drawDebug(true)
+  Map:drawDebug(true)
 end
 
 function Game:keypressed(key)
@@ -145,7 +148,7 @@ function Game:keypressed(key)
 end
 
 function Game:mousepressed(x, y, button)
-  Player:handleMouse(x, y, button, cam, Map)
+  -- replace with checking menu buttons
 end
 
 return Game

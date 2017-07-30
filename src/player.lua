@@ -33,8 +33,9 @@ function Player:initialize(spawnVector)
   self.laserEnd = zeroVector
   self.laserGridEnd = zeroVector
   self.laserStart = zeroVector
-  self.laserDuration = 1
+  self.laserDuration = .3
   self.laserTimer = 0
+  self.laserRange = 3
   self.animationDuration = 0.1
   self.animationTimer = 0
   self.startAnimation = false
@@ -56,9 +57,9 @@ function Player:getPixelPosition()
   return self.drawPosition.x, self.drawPosition.y
 end
 
-function Player:update(dt)
+function Player:update(dt, Map)
   self:updateAnimationTimer(dt)
-  self:updateLaserTimer(dt)
+  self:updateLaserTimer(dt, Map)
   -- Player:updateTween(dt)
 end
 
@@ -74,7 +75,7 @@ function Player:updateAnimationTimer(dt)
   end
 end
 
-function Player:updateLaserTimer(dt)
+function Player:updateLaserTimer(dt, Map)
   if self.laserActive then
     if self.laserTimer < self.laserDuration then
       self.laserTimer = self.laserTimer + dt
@@ -105,18 +106,21 @@ end
 
 -- `tileSize` was declared globally in Game, so we can use it here without defining it in the file
 function Player:draw()
-  self:drawLaser()
   self:drawSprites()
 end
 
 function Player:drawLaser()
   if self.laserActive then
     love.graphics.setColor(255,0,0,100)
-    local x1, y1 = self.laserStart.x, self.laserStart.y
-    local x2, y2 = self.laserEnd.x, self.laserEnd.y
-    love.graphics.line(x1-1, y1-1, x2-1, y2-1)
+    -- local x1 = self.position.x * tileSize + tileSize / 2
+    -- local y1 = self.position.y * tileSize + 18
+    -- local x2 = self.laserEnd.x * tileSize + tileSize / 2
+    -- local y2 = self.laserEnd.y * tileSize + 18
+    local x1 = self.position.x * tileSize + tileSize / 2
+    local y1 = self.position.y * tileSize + tileSize / 2
+    local x2 = self.laserEnd.x * tileSize + tileSize / 2
+    local y2 = self.laserEnd.y * tileSize + tileSize / 2
     love.graphics.line(x1, y1, x2, y2)
-    love.graphics.line(x1+1, y1+1, x2+1, y2+1)
   end
 end
 
@@ -150,6 +154,7 @@ function Player:handleKeys(key, Map, Items)
   -- if self.tween:inProgress() then return end
   local delta = vector(0, 0)
   if not self.laserActive and not self.startAnimation then
+    -- TODO: break up movement and item keys into seperate functions
     if key == 'w' then
       delta.y = delta.y - 1
     elseif key == 's' then
@@ -169,6 +174,7 @@ function Player:handleKeys(key, Map, Items)
     elseif key == 'e' then
       self:dropItem(Map)
     end
+    self:shootLaser(key, Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
@@ -183,38 +189,79 @@ function Player:handleKeys(key, Map, Items)
   end
 end
 
-function Player:handleMouse(x, y, button, cam, Map)
-  if button == 1 then
-    self.laserActive = true
-    self.laserStart.x = self.drawPosition.x + tileSize / 2
-    self.laserStart.y = self.drawPosition.y + tileSize / 2
-
-    local gx, gy = cam:worldCoords(x - x % tileSize, y - y % tileSize)
-    self.laserGridEnd = vector(gx / tileSize, gy / tileSize + .25)
-    local destroyX, destroyY = self:stepLine(self.position, self.laserGridEnd, Map)
-
-    -- print(destroyX, destroyY)
-    -- Map:setGridValue(destroyX, destroyY, 0)
-
-    local ex, ey = cam:worldCoords(x, y)
-    self.laserEnd = vector(ex, ey)
-
+function Player:shootLaser(key, Map)
+  if key == 'up' or key == 'down' or key == 'left' or key == 'right' then
     self:removePower(laserCost)
   end
-end
-
-function Player:stepLine(a, b, Map)
-  local xDist = b.x - a.x
-  local yDist = b.y - a.x
-  local stepX = xDist < 0 and -1 or 1
-  local stepY = yDist < 0 and -1 or 1
-  for y = a.y, yDist, stepY do
-    for x = a.x, xDist, stepX do
-      local val = Map:getGridValue(x, y)
-      if val then
-        print(val)
+  if key == 'up' and not Map:safeCheck(self.position.x, self.position.y - 1) then
+    self.laserActive = true
+    self.laserStart = vector(self.position.x, self.position.y)
+    self.laserEnd = vector(self.laserStart.x, self.laserStart.y)
+    for i = -1, -self.laserRange, -1 do
+      local y = self.laserEnd.y + i
+      if y < 1 then
+        y = 1
+      end
+      self.laserEnd.y = y
+      if Map:getGridValue(self.position.x, y) == 1 then
+        break
       end
     end
+    if self.laserStart ~= self.laserEnd then
+      self.laserActive = true
+    end
+  elseif key == 'down' and not Map:safeCheck(self.position.x, self.position.y + 1) then
+    self.laserActive = true
+    self.laserStart = vector(self.position.x, self.position.y)
+    self.laserEnd = vector(self.laserStart.x, self.laserStart.y)
+    for i = 0, self.laserRange do
+      local y = self.laserEnd.y + i
+      if y > Map.gridHeight then
+        y = Map.gridHeight
+      end
+      self.laserEnd.y = y
+      if Map:getGridValue(self.position.x, y) == 1 then
+        break
+      end
+    end
+    if self.laserStart ~= self.laserEnd then
+      self.laserActive = true
+    end
+  elseif key == 'right' and not Map:safeCheck(self.position.x + 1, self.position.y) then
+    self.laserActive = true
+    self.laserStart = vector(self.position.x, self.position.y)
+    self.laserEnd = vector(self.laserStart.x, self.laserStart.y)
+    for i = 0, self.laserRange do
+      local x = self.laserEnd.x + i
+      if x > Map.gridWidth then
+        x = Map.gridWidth
+      end
+      self.laserEnd.x = x
+      if Map:getGridValue(x, self.position.y) == 1 then
+        break
+      end
+    end
+    if self.laserStart ~= self.laserEnd then
+      self.laserActive = true
+    end
+    self.dir = 'right'
+  elseif key == 'left' and not Map:safeCheck(self.position.x - 1, self.position.y) then
+    self.laserStart = vector(self.position.x, self.position.y)
+    self.laserEnd = vector(self.laserStart.x, self.laserStart.y)
+    for i = -1, -self.laserRange, -1 do
+      local x = self.laserEnd.x + i
+      if x < 1 then
+        x = 1
+      end
+      self.laserEnd.x = x
+      if Map:getGridValue(x, self.position.y) == 1 then
+        break
+      end
+    end
+    if self.laserStart ~= self.laserEnd then
+      self.laserActive = true
+    end
+    self.dir = 'left'
   end
 end
 

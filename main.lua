@@ -28,7 +28,6 @@ function love.update(dt)
 end
 
 function love.draw()
-  Game:drawDebug(false)
   Game:draw(true)
 end
 
