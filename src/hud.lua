@@ -11,7 +11,7 @@ function HUD:draw(Player)
   love.graphics.setColor(255,255,255,230)
   love.graphics.rectangle('fill', x, y, hudWidth, hudHeight)
   love.graphics.setColor(0,0,0)
-  love.graphics.print('Power: ' .. tostring(Player:getPower()), x + 20, y + 10)
+  -- love.graphics.print('Power: ' .. tostring(Player:getPower()), x + 20, y + 10)
 end
 
 return HUD

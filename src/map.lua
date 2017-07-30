@@ -27,11 +27,10 @@ local vector = require 'libs.vector'
 
 local Map = class('Map')
 
-function Map:initialize(dungeon, gridWidth, gridHeight)
-  self.Grid = dungeon._map
+function Map:initialize(map, gridWidth, gridHeight)
+  self.Grid = map
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
-  self:applyWalls()
 
   -- first number is the alpha
   -- second number is the distance to go past for the alpha
@@ -41,6 +40,7 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
     vector(45, 2.5),
     vector(10, 4)
   }
+  -- self:applyWalls()
 end
 
 function Map:applyWalls()
@@ -88,36 +88,6 @@ function Map:initializeEmptyGrid()
   end
 end
 
-function Map:bindEntitiesToGrid(entities)
-  for i = 1, #entities do
-    local entity = entities[i]
-    -- Assure that the entity stays within the Map, otherwise there will be indexing errors
-    local deltaPos = self:bindPositionToBounds(entity.position)
-    local deltaDrawPos = self:bindPositionToBounds(entity.drawPosition / tileSize)
-
-    entity.position = entity.position + deltaPos
-    entity.drawPosition = entity.drawPosition + deltaDrawPos
-  end
-end
-
-function Map:bindPositionToBounds(position)
-  local delta = vector(0, 0)
-  if not self:entityIsInsideBounds(position) then
-    if position.x < 1 then
-      delta.x = 1
-    elseif position.x > self.gridWidth then
-      delta.x = -1
-    end
-    if position.y < 1 then
-      delta.y = 1
-    elseif position.y > self.gridHeight then
-      delta.y = -1
-    end
-  end
-
-  return delta
-end
-
 function Map:entityIsInsideBounds(position)
   return position.x >= 1
     and position.y >= 1
@@ -139,25 +109,7 @@ function Map:drawLayer(layerString, playerPos)
     if val == 2 and layerString == 'floor' then
       love.graphics.draw(sprites['floor'], position.x, position.y)
     end
-    if layerString == 'lighting' then
-      local alpha = Map:getAlpha(vector(x, y), playerPos)
-      alpha = 255 - alpha
-      love.graphics.setColor(0,0,0,alpha)
-      love.graphics.rectangle('fill', position.x, position.y, tileSize, tileSize)
-    end
   end, true)
-end
-
-function Map:getAlpha(gridPos, playerPos)
-  local dist = math.sqrt((gridPos.x - playerPos.x)^2 + (gridPos.y - playerPos.y)^2)
-  local min = 256
-  for i = 1, #self.lightingThresholds do
-    local t = self.lightingThresholds[i] 
-    if dist > t.y then
-      min = math.min(min, t.x)
-    end
-  end
-  return min
 end
 
 function Map:getGridValue(x, y)
