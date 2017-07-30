@@ -31,7 +31,7 @@ end
 
 function Crystal:draw()
   if not self.pickedUp then
-    love.graphics.setColor(255,20,147, 130)
+    love.graphics.setColor(255,255,255, 160)
     local x, y = self.position.x, self.position.y
     love.graphics.draw(self.sprite, x, y)
   end

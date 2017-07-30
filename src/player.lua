@@ -99,7 +99,7 @@ end
 
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor( 30,144,255)
+  love.graphics.setColor(255,255,255)
   -- draw held item
   if self.hasItem then
     love.graphics.draw(self.sprites['crystal'], x, y - 4)
