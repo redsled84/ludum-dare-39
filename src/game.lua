@@ -78,7 +78,7 @@ function Game:update(dt)
 end
 
 function Game:print()
-  print(Player.laserActive)
+  -- print(Player.laserActive)
 end
 
 function Game:checkState()
@@ -145,7 +145,7 @@ function Game:keypressed(key)
 end
 
 function Game:mousepressed(x, y, button)
-  Player:handleMouse(x, y, button, cam)
+  Player:handleMouse(x, y, button, cam, Map)
 end
 
 return Game

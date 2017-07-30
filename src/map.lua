@@ -138,6 +138,11 @@ function Map:getGridValue(x, y)
   return self.Grid[y][x]
 end
 
+function Map:setGridValue(x, y, val)
+  if x <= 0 or y <= 0 or y > self.gridHeight or x > self.gridWidth then return end
+  self.Grid[y][x] = val
+end
+
 function Map:loopGrid(f, continue)
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do

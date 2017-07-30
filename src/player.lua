@@ -183,19 +183,38 @@ function Player:handleKeys(key, Map, Items)
   end
 end
 
-function Player:handleMouse(x, y, button, cam)
+function Player:handleMouse(x, y, button, cam, Map)
   if button == 1 then
     self.laserActive = true
     self.laserStart.x = self.drawPosition.x + tileSize / 2
     self.laserStart.y = self.drawPosition.y + tileSize / 2
 
     local gx, gy = cam:worldCoords(x - x % tileSize, y - y % tileSize)
-    self.laserGridEnd = vector(gx, gy)
+    self.laserGridEnd = vector(gx / tileSize, gy / tileSize + .25)
+    local destroyX, destroyY = self:stepLine(self.position, self.laserGridEnd, Map)
+
+    -- print(destroyX, destroyY)
+    -- Map:setGridValue(destroyX, destroyY, 0)
 
     local ex, ey = cam:worldCoords(x, y)
     self.laserEnd = vector(ex, ey)
 
     self:removePower(laserCost)
+  end
+end
+
+function Player:stepLine(a, b, Map)
+  local xDist = b.x - a.x
+  local yDist = b.y - a.x
+  local stepX = xDist < 0 and -1 or 1
+  local stepY = yDist < 0 and -1 or 1
+  for y = a.y, yDist, stepY do
+    for x = a.x, xDist, stepX do
+      local val = Map:getGridValue(x, y)
+      if val then
+        print(val)
+      end
+    end
   end
 end
 
