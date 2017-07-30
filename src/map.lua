@@ -5,7 +5,8 @@ local vectorUtils = require 'utils.vectorUtils'
 local zeroVector = vectorUtils.getZeroVector()
 local sprites = {
   floor = love.graphics.newImage('sprites/floor_basic.png'),
-  wall = love.graphics.newImage('sprites/wall.png'),
+  top_wall = love.graphics.newImage('sprites/top_wall.png'),
+  bottom_wall = love.graphics.newImage('sprites/bottom_wall.png'),
 }
 local spriteNums = {
   floor = 0,
@@ -120,7 +121,7 @@ function Map:drawBackgroundWalls()
   for i = #self.backgroundWalls, 1, -1 do
     local position = self.backgroundWalls[i] * tileSize
     love.graphics.setColor(255,255,255)
-    love.graphics.draw(sprites['wall'], position.x, position.y - 11)
+    love.graphics.draw(sprites['bottom_wall'], position.x, position.y - 11)
   end
 end
 
@@ -128,7 +129,7 @@ function Map:drawForegroundWalls()
   for i = 1, #self.foregroundWalls do
     local position = self.foregroundWalls[i] * tileSize
     love.graphics.setColor(255,255,255)
-    love.graphics.draw(sprites['wall'], position.x, position.y - 11)
+    love.graphics.draw(sprites['top_wall'], position.x, position.y - 11)
   end
 end
 
