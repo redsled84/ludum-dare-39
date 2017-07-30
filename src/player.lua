@@ -35,7 +35,7 @@ function Player:initialize(spawnVector)
   self.laserStart = zeroVector
   self.laserDuration = 1
   self.laserTimer = 0
-  self.animationDuration = 0.25
+  self.animationDuration = 0.1
   self.animationTimer = 0
   self.startAnimation = false
 end
@@ -194,7 +194,7 @@ function Player:handleMouse(x, y, button, cam)
 
     local ex, ey = cam:worldCoords(x, y)
     self.laserEnd = vector(ex, ey)
-    
+
     self:removePower(laserCost)
   end
 end
