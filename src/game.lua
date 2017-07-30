@@ -145,7 +145,7 @@ function Game:keypressed(key)
 end
 
 function Game:mousepressed(x, y, button)
-  Player:handleMouse(x, y, button)
+  Player:handleMouse(x, y, button, cam)
 end
 
 return Game

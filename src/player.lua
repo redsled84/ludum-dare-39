@@ -2,7 +2,8 @@
 local vectorUtils = require 'utils.vectorUtils'
 
 -- constants
-local powerDecrement = 1
+local powerDecrement = 0.1
+local laserCost = 0.5
 local zeroVector = vectorUtils.getZeroVector()
 
 -- libs
@@ -32,6 +33,7 @@ function Player:initialize(spawnVector)
   self.laserStart = zeroVector
   self.laserEnd = zeroVector
   self.laserDuration = 1
+  self.laserTimer = 0
   self.animationDuration = 0.25
   self.animationTimer = 0
   self.startAnimation = false
@@ -111,7 +113,9 @@ function Player:drawLaser()
     love.graphics.setColor(255,0,0,100)
     local x1, y1 = self.laserStart.x, self.laserStart.y
     local x2, y2 = self.laserEnd.x, self.laserEnd.y
+    love.graphics.line(x1-1, y1-1, x2-1, y2-1)
     love.graphics.line(x1, y1, x2, y2)
+    love.graphics.line(x1+1, y1+1, x2+1, y2+1)
   end
 end
 
@@ -176,11 +180,14 @@ function Player:handleKeys(key, Map, Items)
   end
 end
 
-function Player:handleMouse(x, y, button)
+function Player:handleMouse(x, y, button, cam)
   if button == 1 then
     self.laserActive = true
-    self.laserStart = self.drawPosition + tileSize / 2
-    self.laserEnd = vector(x, y)
+    self.laserStart.x = self.drawPosition.x + tileSize / 2
+    self.laserStart.y = self.drawPosition.y + tileSize / 2
+    local ex, ey = cam:worldCoords(x - x % tileSize, y - y % tileSize)
+    self.laserEnd = vector(ex, ey)
+    self:removePower(laserCost)
   end
 end
 
