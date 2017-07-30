@@ -24,6 +24,7 @@ end
 
 function love.update(dt)
   Game:update(dt)
+  Game:print()
 end
 
 function love.draw()

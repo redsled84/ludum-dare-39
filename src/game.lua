@@ -77,6 +77,10 @@ function Game:update(dt)
   -- Then update the turns
 end
 
+function Game:print()
+  print(Player.laserActive)
+end
+
 function Game:checkState()
   if Player:getPower() <= 0 then
     self.state = 'game_over'
@@ -89,8 +93,8 @@ function Game:draw(bool)
   if self.state == 'game_start' then
     cam:attach()
     Map:drawLayer('floor')
+    self:drawShadows(true)
     Map:drawBackgroundWalls()
-    self:drawShadows()
     Player:draw()
     self:drawItems(true)
     Map:drawForegroundWalls()
@@ -138,6 +142,10 @@ function Game:keypressed(key)
   end
 
   Player:handleKeys(key, Map, self.Items)
+end
+
+function Game:mousepressed(x, y, button)
+  Player:handleMouse(x, y, button)
 end
 
 return Game

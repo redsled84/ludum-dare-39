@@ -40,7 +40,7 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
       else
         valBelow = dungeon._map[y+1][x]
       end
-      if val == 1 and valBelow == 0 or valBelow == 2 then
+      if val == 1 and (valBelow == 0 or valBelow == 2) then
         table.insert(self.backgroundWalls, vector(x, y))
       elseif val == 1 and valBelow == 1 then
         table.insert(self.foregroundWalls, vector(x, y))

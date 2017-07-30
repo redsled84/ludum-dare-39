@@ -28,6 +28,10 @@ function Player:initialize(spawnVector)
     idle = love.graphics.newImage('sprites/left.png'),
     run = love.graphics.newImage('sprites/left_run.png')
   }
+  self.laserActive = false
+  self.laserStart = zeroVector
+  self.laserEnd = zeroVector
+  self.laserDuration = 1
   self.animationDuration = 0.25
   self.animationTimer = 0
   self.startAnimation = false
@@ -51,6 +55,7 @@ end
 
 function Player:update(dt)
   self:updateAnimationTimer(dt)
+  self:updateLaserTimer(dt)
   -- Player:updateTween(dt)
 end
 
@@ -62,6 +67,17 @@ function Player:updateAnimationTimer(dt)
     else
       self.animationTimer = 0
       self.startAnimation = false
+    end
+  end
+end
+
+function Player:updateLaserTimer(dt)
+  if self.laserActive then
+    if self.laserTimer < self.laserDuration then
+      self.laserTimer = self.laserTimer + dt
+    else
+      self.laserTimer = 0
+      self.laserActive = false
     end
   end
 end
@@ -86,7 +102,20 @@ end
 
 -- `tileSize` was declared globally in Game, so we can use it here without defining it in the file
 function Player:draw()
+  self:drawLaser()
+  self:drawSprites()
+end
 
+function Player:drawLaser()
+  if self.laserActive then
+    love.graphics.setColor(255,0,0,100)
+    local x1, y1 = self.laserStart.x, self.laserStart.y
+    local x2, y2 = self.laserEnd.x, self.laserEnd.y
+    love.graphics.line(x1, y1, x2, y2)
+  end
+end
+
+function Player:drawSprites()
   local x, y = self.drawPosition.x, self.drawPosition.y
   love.graphics.setColor(255,255,255)
   -- TODO: use variable for height to subtract
@@ -114,7 +143,6 @@ end
 
 function Player:handleKeys(key, Map, Items)
   -- if self.tween:inProgress() then return end
-
   local delta = vector(0, 0)
   if key == 'w' then
     delta.y = delta.y - 1
@@ -145,6 +173,14 @@ function Player:handleKeys(key, Map, Items)
     self:setPosition(delta)
     -- self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self:removePower(powerDecrement)
+  end
+end
+
+function Player:handleMouse(x, y, button)
+  if button == 1 then
+    self.laserActive = true
+    self.laserStart = self.drawPosition + tileSize / 2
+    self.laserEnd = vector(x, y)
   end
 end
 
