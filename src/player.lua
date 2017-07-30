@@ -20,14 +20,14 @@ function Player:initialize(spawnVector)
   self.drawPosition = spawnVector * tileSize
   self.moveDuration = 0.5
   self.position = spawnVector
-  self.power = 20
+  self.power = 100
   -- self.tween = Tween:new()
   self.item = nil
   self.hasItem = false
   self.dir = 'left'
   self.sprites = {
-    idle = love.graphics.newImage('sprites/left.png'),
-    run = love.graphics.newImage('sprites/left_run.png')
+    idle = love.graphics.newImage('sprites/stand.png'),
+    run = love.graphics.newImage('sprites/run.png')
   }
   self.laserActive = false
   self.laserStart = zeroVector
