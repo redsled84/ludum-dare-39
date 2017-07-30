@@ -8,7 +8,7 @@ local Crystal = class('Crystal')
 function Crystal:initialize(position, strength)
   self.position = position
   self.strength = strength
-  self.sprite = love.graphics.newImage('sprites/crystal-1.png')
+  self.sprite = love.graphics.newImage('sprites/crystal.png')
   self.pickedUp = false
   self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize/3.5)
   self.collider:setCollisionClass('Crystal')

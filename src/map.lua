@@ -6,7 +6,6 @@ local zeroVector = vectorUtils.getZeroVector()
 local sprites = {
   floor = love.graphics.newImage('sprites/floor.png'),
   wall = love.graphics.newImage('sprites/wall.png'),
-  stair = love.graphics.newImage('sprites/stairs.png')
 }
 for k, v in pairs(sprites) do
   sprites[k]:setFilter('nearest', 'nearest')
@@ -108,7 +107,7 @@ function Map:drawLayer(layerString, playerPos)
     end
     if val == 1 or val == 2 then
       love.graphics.draw(sprites['floor'], position.x, position.y)
-    end 
+    end
     if val == spriteNums[layerString] then
       love.graphics.draw(sprites[layerString], position.x, position.y)
     end

@@ -32,7 +32,10 @@ function Player:initialize(spawnVector)
   self.hasItem = false
   self.dir = 'left'
   self.sprites = {
-    idle = love.graphics.newImage('sprites/player3-1.png'),
+    up = love.graphics.newImage('sprites/player_up.png'),
+    down = love.graphics.newImage('sprites/player_down.png'),
+    left = love.graphics.newImage('sprites/player_left.png'),
+    right = love.graphics.newImage('sprites/player_right.png'),
     -- run = love.graphics.newImage('sprites/player_run.png'),
     -- crystal = love.graphics.newImage('sprites/crystal.png')
   }
@@ -102,11 +105,7 @@ function Player:drawSprites()
     love.graphics.draw(self.sprites['crystal'], x, y - 4)
   end
   -- draw player sprite
-  if self.dir == 'left' then
-    love.graphics.draw(self.sprites['idle'], x, y)
-  elseif self.dir == 'right' then
-    love.graphics.draw(self.sprites['idle'], x + tileSize, y, 0, -1, 1)
-  end
+  love.graphics.draw(self.sprites[self.dir], x, y)
 end
 
 function Player:drawDebug(bool)
@@ -122,7 +121,11 @@ function Player:keypressed(key, Map, Items)
       KEYS[k] = true
     end
   end
-  if key == 'd' then
+  if key == 'w' then
+    self.dir = 'up'
+  elseif key == 's' then
+    self.dir = 'down'
+  elseif key == 'd' then
     self.dir = 'right'
   elseif key == 'a' then
     self.dir = 'left'
