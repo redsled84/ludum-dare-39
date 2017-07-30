@@ -10,6 +10,7 @@ local zeroVector = vectorUtils.getZeroVector()
 local class = require 'libs.middleclass'
 local vector = require 'libs.vector'
 local wf = require 'libs.windfield'
+local io = require 'io'
 
 -- src
 -- local Tween = require 'src.tween'
@@ -144,7 +145,7 @@ function Player:drawSprites()
 end
 
 function Player:drawDebug(bool)
-  if not bool then return end 
+  if not bool then return end
   local x, y = self.drawPosition.x, self.drawPosition.y
   love.graphics.setColor(255,120,120)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
@@ -173,8 +174,15 @@ function Player:handleKeys(key, Map, Items)
       end
     elseif key == 'e' then
       self:dropItem(Map)
+    elseif key == 'left' then
+      self:laser(vector(-1, 0), Map)
+    elseif key == 'right' then
+      self:laser(vector(1, 0), Map)
+    elseif key == 'up' then
+      self:laser(vector(0, -1), Map)
+    elseif key == 'down' then
+      self:laser(vector(0, 1), Map)
     end
-    -- self:shootLaser(key, Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
@@ -187,6 +195,16 @@ function Player:handleKeys(key, Map, Items)
     -- self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self:removePower(powerDecrement)
   end
+end
+
+function Player:laser(vec_incr, Map)
+  print(vec_incr)
+  Map:print()
+  cur = self.position
+  while Map:getGridValue(cur.x, cur.y) == 0 do
+    cur = cur + vec_incr
+  end
+  Map:setGridValue(cur.x, cur.y, 0)
 end
 
 function Player:shootLaser(key, Map)
