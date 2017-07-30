@@ -114,9 +114,11 @@ end
 function Game:drawShadows(bool)
   for i = 1, #self.Entities do
     local entity = self.Entities[i]
-    love.graphics.setColor(10, 10, 10, 100)
-    local x, y = entity.drawPosition.x, entity.drawPosition.y
-    love.graphics.ellipse('fill', x + tileSize / 2, y + tileSize - 4, 18, 6)
+    if not entity.pickedUp then
+      love.graphics.setColor(10, 10, 10, 100)
+      local x, y = entity.drawPosition.x, entity.drawPosition.y
+      love.graphics.ellipse('fill', x + tileSize / 2, y + tileSize - 4, 18, 6)
+    end
   end
 end
 
