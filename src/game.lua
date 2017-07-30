@@ -34,7 +34,7 @@ local function getRandomFloorPosition()
     local x, y = math.random(1, Map.gridWidth), math.random(1, Map.gridHeight)
     local val = Map:getGridValue(x, y)
     if val == 0 then
-      return vector(x, y) 
+      return vector(x, y)
     else
       attempts = attempts + 1
     end
@@ -86,7 +86,7 @@ function Game:initialize(firstTime)
   Map:setGridValue(stairPosition.x, stairPosition.y, 4)
 
   self.Entities = {Player, unpack(self.Items)}
-  print(inspect(Map.Grid))
+  --print(inspect(Map.Grid))
 end
 
 function Game:update(dt)

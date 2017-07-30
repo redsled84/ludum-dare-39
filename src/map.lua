@@ -20,6 +20,7 @@ local spriteNums = {
 local class = require 'libs.middleclass'
 local ml = require 'libs.ml'
 local vector = require 'libs.vector'
+local io = require 'io'
 
 -- src
 --
@@ -48,6 +49,15 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
   end
 end
 
+function Map:print()
+  for x = 1, self.gridWidth do
+    for y = 1, self.gridHeight do
+      io.write(self.Grid[y][x])
+    end
+    io.write('\n')
+  end
+end
+
 function Map:initializeEmptyGrid()
   -- Initialize an empty grid
   -- Our grid will look something like this:
@@ -72,7 +82,7 @@ function Map:bindEntitiesToGrid(entities)
     -- Assure that the entity stays within the Map, otherwise there will be indexing errors
     local deltaPos = self:bindPositionToBounds(entity.position)
     local deltaDrawPos = self:bindPositionToBounds(entity.drawPosition / tileSize)
-    
+
     entity.position = entity.position + deltaPos
     entity.drawPosition = entity.drawPosition + deltaDrawPos
   end

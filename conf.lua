@@ -1,5 +1,5 @@
 function love.conf(t)
-  t.window.width = 1280
-  t.window.height = 720
+  t.window.width = 480
+  t.window.height = 480
   t.window.title = '[Insert Game Title Here] | LD 39'
 end
