@@ -12,6 +12,7 @@ local vector = require 'libs.vector'
 local wf = require 'libs.windfield'
 
 -- src
+local Timer = require 'src.timer'
 -- local Tween = require 'src.tween'
 
 local Player = class('Player')
@@ -39,6 +40,7 @@ function Player:initialize(spawnVector)
   self.animationDuration = 0.1
   self.animationTimer = 0
   self.startAnimation = false
+  self.finishedMap = false
 end
 
 function Player:addPower(add)
@@ -55,6 +57,10 @@ end
 
 function Player:getPixelPosition()
   return self.drawPosition.x, self.drawPosition.y
+end
+
+function Player:hasFinishedMap()
+  return self.finishedMap
 end
 
 function Player:update(dt, Map)
@@ -170,6 +176,9 @@ function Player:handleKeys(key, Map, Items)
         self:useItem()
       else
         self:checkItems(Items)
+      end
+      if Map:getGridValue(self.position.x, self.position.y) == 4 then
+        self.finishedMap = true
       end
     elseif key == 'e' then
       self:dropItem(Map)

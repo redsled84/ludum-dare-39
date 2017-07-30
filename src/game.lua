@@ -7,8 +7,8 @@ states = {
   splash_menu = 'splash_menu',
   level_change = 'level_change'
 }
-local gridWidth = 18
-local gridHeight = 18
+local gridWidth = 24
+local gridHeight = 24
 
 -- libs
 local Cam = require 'libs.camera'
@@ -41,12 +41,34 @@ local function getRandomFloorPosition()
   until attempts >= maxAttempts
 end
 
-function Game:initialize()
-  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create()
+local function getRandPositionOutsideRange(a, max)
+  local attempts = 0
+  local maxAttempts = 100
+  repeat
+    local x, y = math.random(1, Map.gridWidth), math.random(1, Map.gridHeight)
+    local val = Map:getGridValue(x, y)
+    local dist = math.sqrt((a.x - x)^2 + (a.y - y)^2)
+    if val == 0 and dist > max then
+      return vector(x, y)
+    else
+      attempts = attempts + 1
+    end
+  until attempts >= maxAttempts
+  getRandPositionOutsideRange(a, max - 1)
+end
+
+function Game:initialize(firstTime)
+  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create(function()end, true)
   Map:initialize(rogueMap, gridWidth, gridHeight)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
   local spawnPosition = getRandomFloorPosition()
-  Player:initialize(spawnPosition)
+  if firstTime then
+    Player:initialize(spawnPosition)
+  else
+    Player.position = spawnPosition
+    Player.drawPosition = spawnPosition * tileSize
+    Player.finishedMap = false
+  end
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
@@ -59,6 +81,9 @@ function Game:initialize()
     local strength = 8
     table.insert(self.Items, Crystal:new(position, strength))
   end
+
+  local stairPosition = getRandPositionOutsideRange(spawnPosition, 10)
+  Map:setGridValue(stairPosition.x, stairPosition.y, 4)
 
   self.Entities = {Player, unpack(self.Items)}
   print(inspect(Map.Grid))
@@ -73,6 +98,9 @@ function Game:update(dt)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
+  if self.state == 'level_change' then
+    self:initialize(false)
+  end
   Map:bindEntitiesToGrid(self.Entities)
 
   -- Then update the turns
@@ -86,6 +114,13 @@ function Game:checkState()
   if Player:getPower() <= 0 then
     self.state = 'game_over'
   end
+  if Player:hasFinishedMap() then
+    self.state = 'level_change'
+  end
+end
+
+function Game:checkLevelChange()
+
 end
 
 function Game:draw(bool)
@@ -95,6 +130,7 @@ function Game:draw(bool)
     cam:attach()
     Map:drawLayer('floor')
     self:drawShadows(true)
+    Map:drawLayer('stair')
     Player:drawLaser()
     Map:drawLayer('wall_side')
     self:drawItems(true)

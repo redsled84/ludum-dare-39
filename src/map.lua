@@ -7,11 +7,13 @@ local sprites = {
   floor = love.graphics.newImage('sprites/floor_basic.png'),
   wall_top = love.graphics.newImage('sprites/wall_top.png'),
   wall_side = love.graphics.newImage('sprites/wall_side.png'),
+  stair = love.graphics.newImage('sprites/stairs.png')
 }
 local spriteNums = {
   floor = 0,
   wall_top = 1,
   wall_side = 3,
+  stair = 4,
 }
 
 -- libs
@@ -107,6 +109,9 @@ function Map:drawLayer(layerString)
     love.graphics.setColor(255,255,255)
     if val == spriteNums[layerString] then
       local offsetY = (val == 3 or val == 1) and -11 or 0
+      if val == spriteNums['stair'] then
+        love.graphics.draw(sprites['floor'], position.x, position.y)
+      end
       love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
     end
   end, true)
