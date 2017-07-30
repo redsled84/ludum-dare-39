@@ -36,8 +36,6 @@ function Player:initialize(spawnVector)
     down = love.graphics.newImage('sprites/player_down.png'),
     left = love.graphics.newImage('sprites/player_left.png'),
     right = love.graphics.newImage('sprites/player_right.png'),
-    -- run = love.graphics.newImage('sprites/player_run.png'),
-    -- crystal = love.graphics.newImage('sprites/crystal.png')
   }
   self.finishedMap = false
   self.velocity = zeroVector
@@ -80,11 +78,15 @@ function Player:updateCollider(dt)
         break
       end
     end
-    local cx, cy = crystal:getPosition()
-    local px, py = self.collider:getPosition()
-    local vx = px - cx
-    local vy = py - cy
-    crystal:setLinearVelocity(vx * 10, vy * 10)
+    if crystal then
+      local cx, cy = crystal:getPosition()
+      local px, py = self.collider:getPosition()
+      local vx = px - cx
+      local vy = py - cy
+      crystal:setLinearVelocity(vx * 10, vy * 10)
+    else
+      self.actionKey = false
+    end
   end
 end
 

@@ -19,13 +19,15 @@ local vector = require 'libs.vector'
 local wf = require 'libs.windfield'
 world = wf.newWorld(0, 0, true)
 world:addCollisionClass('Cell')
-world:addCollisionClass('Player')
 world:addCollisionClass('Crystal')
+world:addCollisionClass('Door')
+world:addCollisionClass('Player')
 
 -- TODO: implement animations
 -- src
 local Cell = require 'src.cell'
 local Crystal = require 'src.crystal'
+local Door = require 'src.door'
 local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
@@ -51,7 +53,7 @@ function Game:initialize(firstTime)
     {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
     {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 0, 2, 0, 0, 0, 1},
+    {1, 3, 1, 1, 0, 2, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -60,18 +62,19 @@ function Game:initialize(firstTime)
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
 
-  self.Cells = {}
   
   Player:initialize(vector(2*tileSize, 4*tileSize))
   
+  self.Cells = {}
   self.Items = {}
+  self.Doors = {}
   self.state = 'game_start'
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
   self:createColliders(grid, gridWidth, gridHeight)
 
-  self.Entities = {Player, unpack(self.Items)}
+  self.Entities = {Player, unpack(self.Items), unpack(self.Doors)}
 
   -- post_shader = PostShader()
   -- post_shader:toggleEffect("blur", 2.0, 2.0)
@@ -82,11 +85,15 @@ function Game:createColliders(grid, gridWidth, gridHeight)
   for y = 1, gridHeight do
     for x = 1, gridWidth do
       local val = grid[y][x]
+      local px, py = x * tileSize, y * tileSize
       if val == 1 then
-        self.Cells[#self.Cells+1] = Cell:new(vector(x * tileSize, y * tileSize))
+        self.Cells[#self.Cells+1] = Cell:new(vector(px, py))
       end
       if val == 2 then
-        self.Items[#self.Items+1] = Crystal:new(vector(x * tileSize, y * tileSize), 5)
+        self.Items[#self.Items+1] = Crystal:new(vector(px, py), 5)
+      end
+      if val == 3 then
+        self.Doors[#self.Doors+1] = Door:new(vector(px, py))
       end
     end
   end
@@ -95,6 +102,8 @@ end
 function Game:update(dt)
   Game:checkState()
   if self.state ~= 'game_over' then
+    world:update(dt)
+
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
       entity:update(dt)
@@ -108,8 +117,6 @@ function Game:update(dt)
     -- local lx, ly = -cam.x, -cam.y
     -- lightWorld:setTranslation(lx, ly, 4)
     -- lightWorld:update(dt)
-
-    world:update(dt)
   end
   if self.state == 'level_change' then
     self:initialize(false)
@@ -137,6 +144,7 @@ function Game:draw(bool)
       Map:drawLayer('wall')
 
       self:drawItems(true)
+      self:drawDoors(true)
 
       Player:draw()
     -- end)
@@ -159,6 +167,14 @@ function Game:drawItems(bool)
   for i = 1, #self.Items do
     local item = self.Items[i]
     item:draw()
+  end
+end
+
+function Game:drawDoors(bool)
+  if not bool then return end
+  for i = 1, #self.Doors do
+    local door = self.Doors[i]
+    door:draw()
   end
 end
 
