@@ -20,6 +20,7 @@ local wf = require 'libs.windfield'
 world = wf.newWorld(0, 0, true)
 world:addCollisionClass('Player')
 world:addCollisionClass('Cell')
+world:addCollisionClass('Crystal')
 
 -- TODO: implement animations
 -- src
@@ -46,8 +47,13 @@ function Game:initialize(firstTime)
   local grid = {
     {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
     {0, 1, 1, 0, 0, 1, 1, 1, 0, 0},
-    {0, 1, 0, 0, 0, 0, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+    {0, 1, 0, 0, 0, 1, 1, 1, 0, 0},
+    {0, 0, 0, 0, 0, 1, 1, 0, 0, 0},
+    {0, 0, 0, 0, 0, 1, 1, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 1, 1, 0, 2, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   }
   local gridHeight = #grid
@@ -55,7 +61,6 @@ function Game:initialize(firstTime)
   Map:initialize(grid, gridWidth, gridHeight)
 
   self.Cells = {}
-  self:createCells(grid, gridWidth, gridHeight)
   
   Player:initialize(vector(0, 0))
   
@@ -64,6 +69,8 @@ function Game:initialize(firstTime)
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
+  self:createColliders(grid, gridWidth, gridHeight)
+  
   self.Entities = {Player, unpack(self.Items)}
 
   -- post_shader = PostShader()
@@ -71,12 +78,15 @@ function Game:initialize(firstTime)
   -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
 end
 
-function Game:createCells(grid, gridWidth, gridHeight)
+function Game:createColliders(grid, gridWidth, gridHeight)
   for y = 1, gridHeight do
     for x = 1, gridWidth do
       local val = grid[y][x]
       if val == 1 then
         self.Cells[#self.Cells+1] = Cell:new(vector(x * tileSize, y * tileSize))
+      end
+      if val == 2 then
+        self.Items[#self.Items+1] = Crystal:new(vector(x * tileSize, y * tileSize), 5)
       end
     end
   end
@@ -85,7 +95,10 @@ end
 function Game:update(dt)
   Game:checkState()
   if self.state ~= 'game_over' then
-    Player:update(dt)
+    for i = 1, #self.Entities do
+      local entity = self.Entities[i]
+      entity:update(dt)
+    end
 
     local camX, camY = Player.position.x, Player.position.y
     cam:lookAt(camX, camY)
@@ -124,6 +137,7 @@ function Game:draw(bool)
       Map:drawLayer('wall')
 
       self:drawItems(true)
+
       Player:draw()
     -- end)
     

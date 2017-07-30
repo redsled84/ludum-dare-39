@@ -40,6 +40,7 @@ function Player:initialize(spawnVector)
   self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
+  self.collider:setObject(self)
   self.speed = 100
 end
 
@@ -95,7 +96,7 @@ end
 
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(255,255,255)
+  love.graphics.setColor( 30,144,255)
   -- draw held item
   if self.hasItem then
     love.graphics.draw(self.sprites['crystal'], x, y - 4)

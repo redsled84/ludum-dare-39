@@ -8,12 +8,14 @@ local sprites = {
   wall = love.graphics.newImage('sprites/wall.png'),
   stair = love.graphics.newImage('sprites/stairs.png')
 }
-sprites['wall']:setFilter('nearest', 'nearest')
-sprites['floor']:setFilter('nearest', 'nearest')
+for k, v in pairs(sprites) do
+  sprites[k]:setFilter('nearest', 'nearest')
+end
 
 local spriteNums = {
   floor = 0,
   wall = 1,
+  crystal = 2,
   stair = 4,
 }
 
@@ -99,8 +101,12 @@ end
 function Map:drawLayer(layerString, playerPos)
   self:loopGrid(function(x, y, val)
     local position = vector(x * tileSize, y * tileSize)
-    love.graphics.setColor(255,255,255)
-    if val == 1 then
+    if val == 0 then
+      love.graphics.setColor(95,158,160)
+    else
+      love.graphics.setColor(46,139,87)
+    end
+    if val == 1 or val == 2 then
       love.graphics.draw(sprites['floor'], position.x, position.y)
     end 
     if val == spriteNums[layerString] then
