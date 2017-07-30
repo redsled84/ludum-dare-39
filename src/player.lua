@@ -132,9 +132,9 @@ function Player:drawSprites()
     end
   else
     if self.dir == 'left' then
-      love.graphics.draw(self.sprites['run'], x, y - 16)
+      love.graphics.draw(self.sprites['run'], x, y)
     elseif self.dir == 'right' then
-      love.graphics.draw(self.sprites['run'], x + tileSize, y - 16, 0, -1, 1)
+      love.graphics.draw(self.sprites['run'], x + tileSize, y, 0, -1, 1)
     end
   end
 end
