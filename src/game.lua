@@ -15,6 +15,8 @@ local Cam = require 'libs.camera'
 local cam = Cam(0, 0)
 local class = require 'libs.middleclass'
 local inspect = require 'libs.inspect'
+local LightWorld = require 'libs.light_world'
+local PostShader = require "libs.light_world.postshader"
 local ROT = require 'libs.rotLove.rot'
 local vector = require 'libs.vector'
 
@@ -58,7 +60,22 @@ local function getRandPositionOutsideRange(a, max)
 end
 
 function Game:initialize(firstTime)
-  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create(function()end, true)
+  lightWorld = LightWorld({
+    ambient = {45, 45, 45},
+    refractionStrength = 1.0,
+    reflectionVisibility = 0.95,
+    shadowBlur = 0.0
+  })
+
+  lightPlayer = lightWorld:newLight(0, 0, 200, 150, 100, 235)
+
+  lightObjects = {}
+  local rogueMap = ROT.Map.Brogue(gridWidth, gridHeight):create(function(x, y, val)
+    if val == 1 then
+      local lo = lightWorld:newRectangle(y*tileSize + tileSize/2, x*tileSize+4, tileSize, tileSize)
+      table.insert(lightObjects, lo)
+    end
+  end, true)
   Map:initialize(rogueMap, gridWidth, gridHeight)
   -- The spawn vector is based on the map grid position not the actual pixel positions...
   local spawnPosition = getRandomFloorPosition()
@@ -87,6 +104,10 @@ function Game:initialize(firstTime)
 
   self.Entities = {Player, unpack(self.Items)}
   --print(inspect(Map.Grid))
+
+  -- post_shader = PostShader()
+  -- post_shader:toggleEffect("blur", 2.0, 2.0)
+  render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
 end
 
 function Game:update(dt)
@@ -97,12 +118,15 @@ function Game:update(dt)
     Player:update(dt, Map)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
+    lightPlayer:setPosition(camX + tileSize / 2, camY + tileSize / 2)
+    lightWorld:update(dt)
+    local lx, ly = -cam.x + love.graphics.getWidth()/2, -cam.y + love.graphics.getHeight()/2
+    lightWorld:setTranslation(lx, ly)
   end
   if self.state == 'level_change' then
     self:initialize(false)
   end
   Map:bindEntitiesToGrid(self.Entities)
-
   -- Then update the turns
 end
 
@@ -124,15 +148,20 @@ function Game:draw(bool)
 
   if self.state == 'game_start' then
     cam:attach()
-    Map:drawLayer('floor')
-    self:drawShadows(true)
-    Map:drawLayer('stair')
-    Player:drawLaser()
-    Map:drawLayer('wall_side')
-    self:drawItems(true)
-    Player:draw()
-    Map:drawLayer('wall_top')
+    lightWorld:draw(function()
+      Map:drawLayer('floor')
+      self:drawShadows(true)
+      Map:drawLayer('stair')
+      Player:drawLaser()
+      Map:drawLayer('wall_side')
+      self:drawItems(true)
+      Player:draw()
+      Map:drawLayer('wall_top')
+    -- Map:drawLayer('lighting', Player.position)
+    end)
     cam:detach()
+    -- love.graphics.setCanvas()
+    -- post_shader:drawWith(render_buffer)
     HUD:draw(Player)
   elseif self.state == 'game_over' then
     -- TODO: change game over screen with player dying animation and restarting game
@@ -166,8 +195,8 @@ function Game:drawDebug(bool)
   if not bool and self.state ~= 'game_over' then return end
   cam:attach()
   Player:drawDebug(true)
-  cam:detach()
   Map:drawDebug(false)
+  cam:detach()
 end
 
 function Game:keypressed(key)

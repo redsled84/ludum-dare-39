@@ -19,8 +19,8 @@ local spriteNums = {
 -- libs
 local class = require 'libs.middleclass'
 local ml = require 'libs.ml'
-local vector = require 'libs.vector'
 local io = require 'io'
+local vector = require 'libs.vector'
 
 -- src
 --
@@ -32,6 +32,15 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
   self:applyWalls()
+
+  -- first number is the alpha
+  -- second number is the distance to go past for the alpha
+  self.lightingThresholds = {
+    vector(255, 1),
+    vector(180, 1.5),
+    vector(45, 2.5),
+    vector(10, 4)
+  }
 end
 
 function Map:applyWalls()
@@ -116,7 +125,7 @@ function Map:entityIsInsideBounds(position)
     and position.y < self.gridHeight
 end
 
-function Map:drawLayer(layerString)
+function Map:drawLayer(layerString, playerPos)
   self:loopGrid(function(x, y, val)
     local position = vector(x * tileSize, y * tileSize)
     love.graphics.setColor(255,255,255)
@@ -127,7 +136,28 @@ function Map:drawLayer(layerString)
       end
       love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
     end
+    if val == 2 and layerString == 'floor' then
+      love.graphics.draw(sprites['floor'], position.x, position.y)
+    end
+    if layerString == 'lighting' then
+      local alpha = Map:getAlpha(vector(x, y), playerPos)
+      alpha = 255 - alpha
+      love.graphics.setColor(0,0,0,alpha)
+      love.graphics.rectangle('fill', position.x, position.y, tileSize, tileSize)
+    end
   end, true)
+end
+
+function Map:getAlpha(gridPos, playerPos)
+  local dist = math.sqrt((gridPos.x - playerPos.x)^2 + (gridPos.y - playerPos.y)^2)
+  local min = 256
+  for i = 1, #self.lightingThresholds do
+    local t = self.lightingThresholds[i] 
+    if dist > t.y then
+      min = math.min(min, t.x)
+    end
+  end
+  return min
 end
 
 function Map:getGridValue(x, y)
