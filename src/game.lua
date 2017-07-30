@@ -22,6 +22,7 @@ world:addCollisionClass('Cell')
 world:addCollisionClass('Crystal')
 world:addCollisionClass('Door')
 world:addCollisionClass('Player')
+world:addCollisionClass('Projectile')
 
 -- TODO: implement animations
 -- src
@@ -62,12 +63,13 @@ function Game:initialize(firstTime)
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
 
-  
-  Player:initialize(vector(2*tileSize, 4*tileSize))
-  
   self.Cells = {}
+
+  Player:initialize(vector(2*tileSize, 4*tileSize), self)
+
   self.Items = {}
   self.Doors = {}
+  self.Projectiles = {}
   self.state = 'game_start'
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
@@ -102,11 +104,16 @@ end
 function Game:update(dt)
   Game:checkState()
   if self.state ~= 'game_over' then
-    world:update(dt)
 
+    print 'updating world'
+    world:update(dt)
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
       entity:update(dt)
+    end
+    for i = 1, #self.Projectiles do
+      local proj = self.Projectiles[i]
+      proj:update(dt)
     end
 
     local camX, camY = Player.position.x, Player.position.y
@@ -148,7 +155,7 @@ function Game:draw(bool)
 
       Player:draw()
     -- end)
-    
+
     cam:detach()
     -- love.graphics.setCanvas()
     -- post_shader:drawWith(render_buffer)
@@ -177,6 +184,7 @@ function Game:drawDoors(bool)
     door:draw()
   end
 end
+
 
 function Game:drawDebug(bool)
   if not bool and self.state ~= 'game_over' then return end

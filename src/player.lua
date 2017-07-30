@@ -5,11 +5,13 @@ local vectorUtils = require 'utils.vectorUtils'
 local powerDecrement = 0.1
 local laserCost = 0.5
 local zeroVector = vectorUtils.getZeroVector()
+local SHOOT_COOLDOWN = 2.0
 local KEYS = {
   w = false,
   s = false,
   d = false,
   a = false,
+  space = false,
 }
 
 -- libs
@@ -18,18 +20,28 @@ local vector = require 'libs.vector'
 local io = require 'io'
 
 -- src
+local Projectile = require 'src.projectile'
 local Timer = require 'src.timer'
 -- local Tween = require 'src.tween'
+local DIR2VEC = {
+  left  = vector(-1, 0),
+  right = vector( 1, 0),
+  up    = vector( 0,-1),
+  down  = vector( 0, 1),
+}
 
 local Player = class('Player')
 
-function Player:initialize(spawnVector)
+function Player:initialize(spawnVector, game)
+  self.game = game
   self.position = spawnVector
   -- self.tween = Tween:new()
   self.width = tileSize
   self.height = tileSize
   self.item = nil
   self.hasItem = false
+  self.shootTimer = 0.0
+  self.projectiles = {}
   self.dir = 'left'
   self.sprites = {
     up = love.graphics.newImage('sprites/player_up.png'),
@@ -62,6 +74,27 @@ function Player:update(dt)
   self.position.x = x - tileSize / 2
   self.position.y = y - tileSize / 2
   self:updateCollider(dt)
+
+  self:handleShoot(dt)
+end
+
+function Player:handleShoot(dt)
+  if self.shootTimer > 0.0 then
+    self.shootTimer = self.shootTimer - dt
+    return
+  end
+  -- fire projectile
+  if KEYS['space'] then
+    self.game.Projectiles[#self.projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir])
+    self.shootTimer = SHOOT_COOLDOWN
+  end
+end
+
+function Player:updateProjectiles(dt)
+  for i = 1, #self.projectiles do
+    local entity = self.projectiles[i]
+    entity:update(dt)
+  end
 end
 
 function Player:updateCollider(dt)
@@ -137,6 +170,10 @@ function Player:drawSprites()
   end
   -- draw player sprite
   love.graphics.draw(self.sprites[self.dir], x, y)
+  -- projectiles
+  for i = 1, #self.projectiles do
+    self.projectiles[i]:draw()
+  end
 end
 
 function Player:drawDebug(bool)
