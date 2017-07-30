@@ -31,16 +31,19 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
   self.Grid = dungeon._map
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
+  self:applyWalls()
+end
 
-  for y = 1, gridHeight do
-    local row = dungeon._map[y]
-    for x = 1, gridWidth do
-      local val = dungeon._map[y][x]
+function Map:applyWalls()
+  for y = 1, self.gridHeight do
+    local row = self.Grid[y]
+    for x = 1, self.gridWidth do
+      local val = self.Grid[y][x]
       local valBelow
       if y == gridHeight then
         valBelow = val
       else
-        valBelow = dungeon._map[y+1][x]
+        valBelow = not self:safeCheck(x, y + 1) and self.Grid[y+1][x] or self.Grid[y][x]
       end
       if val == 1 and (valBelow == 0 or valBelow == 2) then
         self.Grid[y][x] = 3

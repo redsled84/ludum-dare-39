@@ -119,10 +119,6 @@ function Game:checkState()
   end
 end
 
-function Game:checkLevelChange()
-
-end
-
 function Game:draw(bool)
   if not bool then return end
 
@@ -168,8 +164,10 @@ end
 
 function Game:drawDebug(bool)
   if not bool and self.state ~= 'game_over' then return end
+  cam:attach()
   Player:drawDebug(true)
-  Map:drawDebug(true)
+  cam:detach()
+  Map:drawDebug(false)
 end
 
 function Game:keypressed(key)

@@ -207,13 +207,13 @@ function Player:handleKeys(key, Map, Items)
 end
 
 function Player:laser(vec_incr, Map)
-  print(vec_incr)
-  Map:print()
+  -- Map:print()
   cur = self.position
   while Map:getGridValue(cur.x, cur.y) == 0 do
     cur = cur + vec_incr
   end
   Map:setGridValue(cur.x, cur.y, 0)
+  Map:applyWalls()
 end
 
 function Player:shootLaser(key, Map)
