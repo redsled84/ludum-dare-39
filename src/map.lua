@@ -100,6 +100,9 @@ function Map:drawLayer(layerString, playerPos)
   self:loopGrid(function(x, y, val)
     local position = vector(x * tileSize, y * tileSize)
     love.graphics.setColor(255,255,255)
+    if val == 1 then
+      love.graphics.draw(sprites['floor'], position.x, position.y)
+    end 
     if val == spriteNums[layerString] then
       love.graphics.draw(sprites[layerString], position.x, position.y)
     end
