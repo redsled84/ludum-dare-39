@@ -29,7 +29,8 @@ function Player:initialize(spawnVector)
   self.dir = 'left'
   self.sprites = {
     idle = love.graphics.newImage('sprites/player_idle.png'),
-    run = love.graphics.newImage('sprites/player_run.png')
+    run = love.graphics.newImage('sprites/player_run.png'),
+    crystal = love.graphics.newImage('sprites/crystal.png')
   }
   self.laserActive = false
   self.laserEnd = zeroVector
@@ -38,9 +39,6 @@ function Player:initialize(spawnVector)
   self.laserDuration = .3
   self.laserTimer = 0
   self.laserRange = 3
-  self.animationDuration = 0.1
-  self.animationTimer = 0
-  self.startAnimation = false
   self.finishedMap = false
 end
 
@@ -64,40 +62,7 @@ function Player:hasFinishedMap()
   return self.finishedMap
 end
 
-function Player:update(dt, Map)
-  self:updateAnimationTimer(dt)
-  self:updateLaserTimer(dt, Map)
-  -- Player:updateTween(dt)
-end
-
--- Replace with modular timers
-function Player:updateAnimationTimer(dt)
-  if self.startAnimation then
-    if self.animationTimer < self.animationDuration then
-      self.animationTimer = self.animationTimer + dt
-    else
-      self.animationTimer = 0
-      self.startAnimation = false
-    end
-  end
-end
-
-function Player:updateLaserTimer(dt, Map)
-  if self.laserActive then
-    if self.laserTimer < self.laserDuration then
-      self.laserTimer = self.laserTimer + dt
-    else
-      self.laserTimer = 0
-      self.laserActive = false
-    end
-  end
-end
-
-function Player:updateTween(dt)
-  if self.tween:inProgress() then
-    self.tween:update(dt)
-    self.drawPosition = self.tween:position()
-  end
+function Player:update(dt)
 end
 
 function Player:checkItems(Items)
@@ -116,37 +81,18 @@ function Player:draw()
   self:drawSprites()
 end
 
-function Player:drawLaser()
-  if self.laserActive then
-    love.graphics.setColor(255,0,0,100)
-    -- local x1 = self.position.x * tileSize + tileSize / 2
-    -- local y1 = self.position.y * tileSize + 18
-    -- local x2 = self.laserEnd.x * tileSize + tileSize / 2
-    -- local y2 = self.laserEnd.y * tileSize + 18
-    local x1 = self.position.x * tileSize + tileSize / 2
-    local y1 = self.position.y * tileSize + tileSize / 2
-    local x2 = self.laserEnd.x * tileSize + tileSize / 2
-    local y2 = self.laserEnd.y * tileSize + tileSize / 2
-    love.graphics.line(x1, y1, x2, y2)
-  end
-end
-
 function Player:drawSprites()
   local x, y = self.drawPosition.x, self.drawPosition.y
   love.graphics.setColor(255,255,255)
-  -- TODO: use variable for height to subtract
-  if self.animationTimer == 0 then
-    if self.dir == 'left' then
-      love.graphics.draw(self.sprites['idle'], x, y)
-    elseif self.dir == 'right' then
-      love.graphics.draw(self.sprites['idle'], x + tileSize, y, 0, -1, 1)
-    end
-  else
-    if self.dir == 'left' then
-      love.graphics.draw(self.sprites['run'], x, y)
-    elseif self.dir == 'right' then
-      love.graphics.draw(self.sprites['run'], x + tileSize, y, 0, -1, 1)
-    end
+  -- draw held item
+  if self.hasItem then
+    love.graphics.draw(self.sprites['crystal'], x, y - 4)
+  end
+  -- draw player sprite
+  if self.dir == 'left' then
+    love.graphics.draw(self.sprites['idle'], x, y)
+  elseif self.dir == 'right' then
+    love.graphics.draw(self.sprites['idle'], x + tileSize, y, 0, -1, 1)
   end
 end
 
@@ -158,48 +104,39 @@ function Player:drawDebug(bool)
 end
 
 function Player:handleKeys(key, Map, Items)
-  -- if self.tween:inProgress() then return end
   local delta = vector(0, 0)
-  if not self.laserActive and not self.startAnimation then
-    -- TODO: break up movement and item keys into seperate functions
-    if key == 'w' then
-      delta.y = delta.y - 1
-    elseif key == 's' then
-      delta.y = delta.y + 1
-    elseif key == 'a' then
-      delta.x = delta.x - 1
-      self.dir = 'left'
-    elseif key == 'd' then
-      delta.x = delta.x + 1
-      self.dir = 'right'
-    elseif key == 'f' then
-      if self.hasItem then
-        self:useItem()
-      else
-        self:checkItems(Items)
-      end
-      if Map:getGridValue(self.position.x, self.position.y) == 4 then
-        self.finishedMap = true
-      end
-    elseif key == 'e' then
-      self:dropItem(Map)
-    elseif key == 'left' then
-      self:laser(vector(-1, 0), Map)
-    elseif key == 'right' then
-      self:laser(vector(1, 0), Map)
-    elseif key == 'up' then
-      self:laser(vector(0, -1), Map)
-    elseif key == 'down' then
-      self:laser(vector(0, 1), Map)
+  if key == 'w' then -- movement
+    delta.y = delta.y - 1
+  elseif key == 's' then
+    delta.y = delta.y + 1
+  elseif key == 'a' then
+    delta.x = delta.x - 1
+    self.dir = 'left'
+  elseif key == 'd' then
+    delta.x = delta.x + 1
+    self.dir = 'right'
+  elseif key == 'f' then -- item use/pickup
+    if self.hasItem then
+      self:useItem()
+    else
+      self:checkItems(Items)
     end
+    if Map:getGridValue(self.position.x, self.position.y) == 4 then
+      self.finishedMap = true
+    end
+  elseif key == 'e' then -- item drop
+    self:dropItem(Map)
+  elseif key == 'left' then -- shoot laser
+    self:laser(vector(-1, 0), Map)
+  elseif key == 'right' then
+    self:laser(vector(1, 0), Map)
+  elseif key == 'up' then
+    self:laser(vector(0, -1), Map)
+  elseif key == 'down' then
+    self:laser(vector(0, 1), Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
-    if self.startAnimation then
-      self.animationTimer = 0
-    else
-      self.startAnimation = true
-    end
     self:setPosition(delta)
     -- self.tween:start(tileSize * self.position, tileSize * (self.position + delta), self.moveDuration)
     self:removePower(powerDecrement)
