@@ -61,6 +61,7 @@ function Game:initialize()
   end
 
   self.Entities = {Player, unpack(self.Items)}
+  print(inspect(Map.Grid))
 end
 
 function Game:update(dt)
@@ -72,7 +73,6 @@ function Game:update(dt)
     local camX, camY = Player:getPixelPosition()
     cam:lookAt(camX, camY)
   end
-  Map:updateWalls()
   Map:bindEntitiesToGrid(self.Entities)
 
   -- Then update the turns
@@ -96,10 +96,10 @@ function Game:draw(bool)
     Map:drawLayer('floor')
     self:drawShadows(true)
     Player:drawLaser()
-    Map:drawBackgroundWalls()
+    Map:drawLayer('wall_side')
     self:drawItems(true)
     Player:draw()
-    Map:drawForegroundWalls()
+    Map:drawLayer('wall_top')
     cam:detach()
     HUD:draw(Player)
   elseif self.state == 'game_over' then

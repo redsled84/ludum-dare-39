@@ -10,7 +10,8 @@ local sprites = {
 }
 local spriteNums = {
   floor = 0,
-  wall = 1,
+  wall_top = 1,
+  wall_side = 3,
 }
 
 -- libs
@@ -24,13 +25,9 @@ local vector = require 'libs.vector'
 local Map = class('Map')
 
 function Map:initialize(dungeon, gridWidth, gridHeight)
-  self.Dungeon = dungeon
   self.Grid = dungeon._map
   self.gridWidth = gridWidth
   self.gridHeight = gridHeight
-
-  self.backgroundWalls = {}
-  self.foregroundWalls = {}
 
   for y = 1, gridHeight do
     local row = dungeon._map[y]
@@ -43,9 +40,7 @@ function Map:initialize(dungeon, gridWidth, gridHeight)
         valBelow = dungeon._map[y+1][x]
       end
       if val == 1 and (valBelow == 0 or valBelow == 2) then
-        table.insert(self.backgroundWalls, vector(x, y))
-      elseif val == 1 and valBelow == 1 then
-        table.insert(self.foregroundWalls, vector(x, y))
+        self.Grid[y][x] = 3
       end
     end
   end
@@ -111,27 +106,10 @@ function Map:drawLayer(layerString)
     local position = vector(x * tileSize, y * tileSize)
     love.graphics.setColor(255,255,255)
     if val == spriteNums[layerString] then
-      local offsetY = val == 1 and -11 or 0
+      local offsetY = (val == 3 or val == 1) and -11 or 0
       love.graphics.draw(sprites[layerString], position.x, position.y + offsetY)
     end
   end, true)
-end
-
-function Map:drawBackgroundWalls()
-  -- loop in reverse order
-  for i = #self.backgroundWalls, 1, -1 do
-    local position = self.backgroundWalls[i] * tileSize
-    love.graphics.setColor(255,255,255)
-    love.graphics.draw(sprites['wall_side'], position.x, position.y - 11)
-  end
-end
-
-function Map:drawForegroundWalls()
-  for i = 1, #self.foregroundWalls do
-    local position = self.foregroundWalls[i] * tileSize
-    love.graphics.setColor(255,255,255)
-    love.graphics.draw(sprites['wall_top'], position.x, position.y - 11)
-  end
 end
 
 function Map:getGridValue(x, y)
@@ -142,46 +120,6 @@ end
 function Map:setGridValue(x, y, val)
   if self:safeCheck(x, y) then return end
   self.Grid[y][x] = val
-end
-
-function Map:removeWall(x, y)
-  self:setGridValue(x, y, 0)
-end
-
-function Map:updateWalls()
-  self:loopGrid(function(x, y, val)
-    if val == 0 then
-      local i = self:getForegroundWall(x, y)
-      local j = self:getBackgroundWall(x, y)
-      if i then
-        
-        table.remove(self.foregroundWalls, i)
-      end
-      if j then
-        table.remove(self.backgroundWalls, j)
-      end
-    end
-  end, true)
-end
-
-function Map:getBackgroundWall(x, y)
-  for i = #self.backgroundWalls, 1, -1 do
-    local position = self.backgroundWalls[i]
-    if position.x == x and position.y == y then
-      return i
-    end
-  end
-  return false
-end
-
-function Map:getForegroundWall(x, y)
-  for i = #self.foregroundWalls, 1, -1 do
-    local position = self.foregroundWalls[i]
-    if position.x == x and position.y == y then
-      return i
-    end
-  end
-  return false
 end
 
 function Map:safeCheck(x, y)

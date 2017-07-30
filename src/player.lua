@@ -174,7 +174,7 @@ function Player:handleKeys(key, Map, Items)
     elseif key == 'e' then
       self:dropItem(Map)
     end
-    self:shootLaser(key, Map)
+    -- self:shootLaser(key, Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
@@ -307,7 +307,7 @@ end
 function Player:checkNextPosition(delta, Map)
   local temp = delta + self.position
   local val = Map:getGridValue(temp.x, temp.y)
-  return val == 1
+  return val == 1 or val == 3
 end
 
 function Player:setPosition(delta)
