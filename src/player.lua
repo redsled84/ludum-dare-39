@@ -6,11 +6,13 @@ local vectorUtils = require 'utils.vectorUtils'
 local powerDecrement = 0.1
 local laserCost = 0.5
 local zeroVector = vectorUtils.getZeroVector()
+local SHOOT_COOLDOWN = 2.0
 local KEYS = {
   w = false,
   s = false,
   d = false,
   a = false,
+  space = false,
 }
 
 -- libs
@@ -19,8 +21,15 @@ local vector = require 'libs.vector'
 local io = require 'io'
 
 -- src
+local Projectile = require 'src.projectile'
 local Timer = require 'src.timer'
 -- local Tween = require 'src.tween'
+local DIR2VEC = {
+  left  = vector(-1, 0),
+  right = vector( 1, 0),
+  up    = vector( 0,-1),
+  down  = vector( 0, 1),
+}
 
 local Player = class('Player')
 
@@ -32,6 +41,7 @@ function Player:initialize(spawnVector)
   self.height = tileSize
   self.item = nil
   self.hasItem = false
+  self.shootTimer = 0.0
   self.dir = 'left'
   self.sprites = {
     up = love.graphics.newImage('sprites/player_up.png'),
@@ -54,10 +64,24 @@ function Player:hasFinishedMap()
   return self.finishedMap
 end
 
-function Player:update(dt)
+function Player:update(dt, Projectiles)
   self:movementWithKeys(dt)
   self.position = colliderUtils.getPosition(self.collider)
   self:updateCollider(dt)
+
+  self:handleShoot(dt, Projectiles)
+end
+
+function Player:handleShoot(dt, Projectiles)
+  if self.shootTimer > 0.0 then
+    self.shootTimer = self.shootTimer - dt
+    return
+  end
+  -- fire projectile
+  if KEYS['space'] then
+    Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir])
+    self.shootTimer = SHOOT_COOLDOWN
+  end
 end
 
 function Player:updateCollider(dt)

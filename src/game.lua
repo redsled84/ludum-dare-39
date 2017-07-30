@@ -23,6 +23,7 @@ world:addCollisionClass('Crystal')
 world:addCollisionClass('Door')
 world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
+world:addCollisionClass('Projectile')
 
 -- TODO: implement animations
 -- src
@@ -63,10 +64,10 @@ function Game:initialize(firstTime)
   local gridHeight = #grid
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
-  
   Player:initialize(vector(2*tileSize, 6*tileSize))
-  
+
   self.Cells = {}
+  self.Projectiles = {}
   self.state = 'game_start'
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
@@ -104,16 +105,22 @@ function Game:update(dt)
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
-
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
+      if entity.name == 'Player' then
+        entity:update(dt, self.Projectiles)
+      end
       if entity.name ~= 'Door' then
         entity:update(dt)
-      else
+      elseif entity.name ~= 'Player' then
         -- for now this gets all the terminals, but we can change it to lists of specific terminals
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)
       end
+    end
+    for i = 1, #self.Projectiles do
+      local proj = self.Projectiles[i]
+      proj:update(dt)
     end
 
     local camX, camY = Player.position.x, Player.position.y
@@ -164,7 +171,7 @@ function Game:draw(bool)
 
       Player:draw()
     -- end)
-    
+
     cam:detach()
     -- love.graphics.setCanvas()
     -- post_shader:drawWith(render_buffer)
@@ -188,7 +195,13 @@ function Game:drawEntities(bool)
       love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
     end
   end
+  for i = 1, #self.Projectiles do
+    local proj = self.Projectiles[i]
+    love.graphics.setColor(255,255,255)
+    proj:draw()
+  end
 end
+
 
 function Game:drawDebug(bool)
   if not bool and self.state ~= 'game_over' then return end
