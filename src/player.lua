@@ -40,11 +40,18 @@ function Player:initialize(spawnVector)
     -- crystal = love.graphics.newImage('sprites/crystal.png')
   }
   self.finishedMap = false
-  self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2)
+  self.velocity = zeroVector
+  self.speed = 100
+  self.actionKey = false
+  self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 2.2, tileSize / 2.2)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
   self.collider:setObject(self)
-  self.speed = 100
+  self.collider:setPreSolve(function(c1, c2, contact)
+    if c1.collision_class == 'Player' and c2.collision_class == 'Crystal' then
+      contact:setEnabled(false)
+    end
+  end)
 end
 
 function Player:hasFinishedMap()
@@ -56,29 +63,52 @@ function Player:update(dt)
   local x, y = self.collider:getPosition()
   self.position.x = x - tileSize / 2
   self.position.y = y - tileSize / 2
+  self:updateCollider(dt)
+end
+
+function Player:updateCollider(dt)
+  local colliders
+  if self.actionKey then
+    local x, y = self.collider:getPosition()
+    colliders = world:queryCircleArea(x, y, 20, {'Crystal'})
+  end
+  if colliders then
+    local crystal = nil
+    for i = 1, #colliders do
+      if colliders[i].collision_class == 'Crystal' then
+        crystal = colliders[i]
+        break
+      end
+    end
+    local cx, cy = crystal:getPosition()
+    local px, py = self.collider:getPosition()
+    local vx = px - cx
+    local vy = py - cy
+    crystal:setLinearVelocity(vx * 10, vy * 10)
+  end
 end
 
 function Player:movementWithKeys()
-  local delta = zeroVector
+  self.velocity = zeroVector
   if KEYS['d'] then
-    delta.x = self.speed
+    self.velocity.x = self.speed
     self.dir = 'right'
   elseif KEYS['a'] then
-    delta.x = -self.speed
+    self.velocity.x = -self.speed
     self.dir = 'left'
   elseif not KEYS['a'] and not KEYS['d'] then
-    delta.x = 0
+    self.velocity.x = 0
   end
   if KEYS['s'] then
-    delta.y = self.speed
+    self.velocity.y = self.speed
     self.dir = 'down'
   elseif KEYS['w'] then
-    delta.y = -self.speed
+    self.velocity.y = -self.speed
     self.dir = 'up'
   elseif not KEYS['w'] and not KEYS['s'] then
-    delta.y = 0
+    self.velocity.y = 0
   end
-  self.collider:setLinearVelocity(delta.x, delta.y)
+  self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
 end
 
 function Player:checkItems(Items)
@@ -114,71 +144,21 @@ function Player:drawDebug(bool)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 
-function Player:keypressed(key, Map, Items)
+function Player:keypressed(key)
   for k, v in pairs(KEYS) do
     if k == key and not v then
       KEYS[k] = true
     end
   end
-  -- if key == 'f' then -- item use/pickup
-  --   if self.hasItem then
-  --     self:useItem()
-  --   else
-  --     self:checkItems(Items)
-  --   end
-  --   local x, y = self:getGridPosition()
-  --   if Map:getGridValue(x, y) == 4 then
-  --     self.finishedMap = true
-  --   end
-  -- elseif key == 'e' then -- item drop
-  --   self:dropItem(Map)
-  -- end
+  if key == 'f' then
+    self.actionKey = not self.actionKey
+  end
 end
 
 function Player:keyreleased(key)
   for k, v in pairs(KEYS) do
     if k == key and v then
       KEYS[k] = false
-    end
-  end
-end
-
-function Player:useItem()
-  if self.hasItem then
-    self:addPower(self.item:getPower())
-    self.item:setPower(0)
-    self.item = nil
-    self.hasItem = false
-  end
-end
-
-function Player:dropItem(Map)
-  if self.hasItem and self.item.pickedUp then
-    local x, y = self:getGridPosition()
-    local positions = {
-      Map:getGridValue(x, y - 1),
-      Map:getGridValue(x, y + 1),
-      Map:getGridValue(x + 1, y),
-      Map:getGridValue(x - 1, y)
-    }
-
-    self.item.pickedUp = false
-    self.hasItem = false
-
-    for i = 1, #positions do
-      local val = positions[i]
-      if val == 0 then
-        local temp = zeroVector()
-        if i == 1 then
-          self.item:setPosition(x, y - 1)
-        elseif i == 2 then
-          self.item:setPosition(x, y + 1)
-        elseif i == 3 then
-          self.item:setPosition(x + 1, y)
-        elseif i == 4 then
-          self.item:setPosition(x - 1, y)
-        end
-      end
     end
   end
 end

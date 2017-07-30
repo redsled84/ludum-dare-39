@@ -18,8 +18,8 @@ local PostShader = require "libs.light_world.postshader"
 local vector = require 'libs.vector'
 local wf = require 'libs.windfield'
 world = wf.newWorld(0, 0, true)
-world:addCollisionClass('Player')
 world:addCollisionClass('Cell')
+world:addCollisionClass('Player')
 world:addCollisionClass('Crystal')
 
 -- TODO: implement animations
@@ -45,16 +45,16 @@ function Game:initialize(firstTime)
   -- lightObjects = {}
 
   local grid = {
-    {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-    {0, 1, 1, 0, 0, 1, 1, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 1, 1, 0, 0},
-    {0, 0, 0, 0, 0, 1, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 1, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 1, 1, 0, 2, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {1, 1, 1, 0, 0, 1, 1, 1, 0, 1},
+    {1, 1, 0, 0, 0, 1, 1, 1, 0, 1},
+    {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
+    {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 1, 0, 2, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   }
   local gridHeight = #grid
   local gridWidth = #grid[1]
@@ -62,7 +62,7 @@ function Game:initialize(firstTime)
 
   self.Cells = {}
   
-  Player:initialize(vector(0, 0))
+  Player:initialize(vector(2*tileSize, 4*tileSize))
   
   self.Items = {}
   self.state = 'game_start'
@@ -70,7 +70,7 @@ function Game:initialize(firstTime)
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
   self:createColliders(grid, gridWidth, gridHeight)
-  
+
   self.Entities = {Player, unpack(self.Items)}
 
   -- post_shader = PostShader()
@@ -184,6 +184,12 @@ function Game:keypressed(key)
   end
   if key == 'q' then
     love.event.quit()
+  end
+  if key == 'p' then
+    local colliders = world:queryCircleArea(100, 100, 100)
+    for _, collider in ipairs(colliders) do
+      collider:applyLinearImpulse(1000, 1000)
+    end
   end
 
   Player:keypressed(key)

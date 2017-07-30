@@ -19,7 +19,6 @@ local Game = require 'src.game'
 -- same order here.
 
 function love.load()
-  
   Game:initialize(true)
 end
 

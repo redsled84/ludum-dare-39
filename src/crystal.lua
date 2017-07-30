@@ -10,9 +10,9 @@ function Crystal:initialize(position, strength)
   self.strength = strength
   self.sprite = love.graphics.newImage('sprites/crystal.png')
   self.pickedUp = false
-  self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize/3.5)
+  self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize/3.5, tileSize/3.5)
   self.collider:setCollisionClass('Crystal')
-  self.collider:setLinearDamping(8)
+  self.collider:setLinearDamping(10)
 end
 
 function Crystal:update(dt)
