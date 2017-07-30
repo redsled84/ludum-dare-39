@@ -62,24 +62,23 @@ function Player:movementWithKeys()
   local delta = zeroVector
   if KEYS['d'] then
     delta.x = self.speed
+    self.dir = 'right'
   elseif KEYS['a'] then
     delta.x = -self.speed
+    self.dir = 'left'
   elseif not KEYS['a'] and not KEYS['d'] then
     delta.x = 0
   end
   if KEYS['s'] then
     delta.y = self.speed
+    self.dir = 'down'
   elseif KEYS['w'] then
     delta.y = -self.speed
+    self.dir = 'up'
   elseif not KEYS['w'] and not KEYS['s'] then
     delta.y = 0
   end
   self.collider:setLinearVelocity(delta.x, delta.y)
-end
-
-function Player:getGridPosition()
-  return (self.position.x - self.position.x % tileSize) / tileSize,
-    (self.position.y - self.position.y % tileSize) / tileSize
 end
 
 function Player:checkItems(Items)
@@ -121,16 +120,6 @@ function Player:keypressed(key, Map, Items)
       KEYS[k] = true
     end
   end
-  if key == 'w' then
-    self.dir = 'up'
-  elseif key == 's' then
-    self.dir = 'down'
-  elseif key == 'd' then
-    self.dir = 'right'
-  elseif key == 'a' then
-    self.dir = 'left'
-  end
-
   -- if key == 'f' then -- item use/pickup
   --   if self.hasItem then
   --     self:useItem()
