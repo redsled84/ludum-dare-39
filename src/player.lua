@@ -30,8 +30,9 @@ function Player:initialize(spawnVector)
     run = love.graphics.newImage('sprites/run.png')
   }
   self.laserActive = false
-  self.laserStart = zeroVector
   self.laserEnd = zeroVector
+  self.laserGridEnd = zeroVector
+  self.laserStart = zeroVector
   self.laserDuration = 1
   self.laserTimer = 0
   self.animationDuration = 0.25
@@ -148,24 +149,26 @@ end
 function Player:handleKeys(key, Map, Items)
   -- if self.tween:inProgress() then return end
   local delta = vector(0, 0)
-  if key == 'w' then
-    delta.y = delta.y - 1
-  elseif key == 's' then
-    delta.y = delta.y + 1
-  elseif key == 'a' then
-    delta.x = delta.x - 1
-    self.dir = 'left'
-  elseif key == 'd' then
-    delta.x = delta.x + 1
-    self.dir = 'right'
-  elseif key == 'f' then
-    if self.hasItem then
-      self:useItem()
-    else
-      self:checkItems(Items)
+  if not self.laserActive and not self.startAnimation then
+    if key == 'w' then
+      delta.y = delta.y - 1
+    elseif key == 's' then
+      delta.y = delta.y + 1
+    elseif key == 'a' then
+      delta.x = delta.x - 1
+      self.dir = 'left'
+    elseif key == 'd' then
+      delta.x = delta.x + 1
+      self.dir = 'right'
+    elseif key == 'f' then
+      if self.hasItem then
+        self:useItem()
+      else
+        self:checkItems(Items)
+      end
+    elseif key == 'e' then
+      self:dropItem(Map)
     end
-  elseif key == 'e' then
-    self:dropItem(Map)
   end
 
   if delta ~= vector(0, 0) and not Player:checkNextPosition(delta, Map) then
@@ -185,8 +188,13 @@ function Player:handleMouse(x, y, button, cam)
     self.laserActive = true
     self.laserStart.x = self.drawPosition.x + tileSize / 2
     self.laserStart.y = self.drawPosition.y + tileSize / 2
-    local ex, ey = cam:worldCoords(x - x % tileSize, y - y % tileSize)
+
+    local gx, gy = cam:worldCoords(x - x % tileSize, y - y % tileSize)
+    self.laserGridEnd = vector(gx, gy)
+
+    local ex, ey = cam:worldCoords(x, y)
     self.laserEnd = vector(ex, ey)
+    
     self:removePower(laserCost)
   end
 end
