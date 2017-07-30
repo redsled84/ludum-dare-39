@@ -140,7 +140,7 @@ function Game:draw(bool)
     love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
   end
-  self:drawDebug(true)
+  self:drawDebug(false)
 end
 
 function Game:drawItems(bool)
