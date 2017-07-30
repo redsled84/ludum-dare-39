@@ -15,7 +15,6 @@ local spriteNums = {
   floor = 0,
   wall = 1,
   crystal = 2,
-  stair = 4,
 }
 
 -- libs
@@ -45,23 +44,23 @@ function Map:initialize(map, gridWidth, gridHeight)
   -- self:applyWalls()
 end
 
-function Map:applyWalls()
-  for y = 1, self.gridHeight do
-    local row = self.Grid[y]
-    for x = 1, self.gridWidth do
-      local val = self.Grid[y][x]
-      local valBelow
-      if y == gridHeight then
-        valBelow = val
-      else
-        valBelow = not self:safeCheck(x, y + 1) and self.Grid[y+1][x] or self.Grid[y][x]
-      end
-      if val == 1 and (valBelow == 0 or valBelow == 2) then
-        self.Grid[y][x] = 3
-      end
-    end
-  end
-end
+-- function Map:applyWalls()
+--   for y = 1, self.gridHeight do
+--     local row = self.Grid[y]
+--     for x = 1, self.gridWidth do
+--       local val = self.Grid[y][x]
+--       local valBelow
+--       if y == gridHeight then
+--         valBelow = val
+--       else
+--         valBelow = not self:safeCheck(x, y + 1) and self.Grid[y+1][x] or self.Grid[y][x]
+--       end
+--       if val == 1 and (valBelow == 0 or valBelow == 2) then
+--         self.Grid[y][x] = 3
+--       end
+--     end
+--   end
+-- end
 
 function Map:print()
   for x = 1, self.gridWidth do
@@ -130,6 +129,7 @@ function Map:safeCheck(x, y)
 end
 
 function Map:loopGrid(f, continue)
+  local continue = continue or true
   for y = 1, self.gridHeight do
     for x = 1, self.gridWidth do
       if not continue then break end

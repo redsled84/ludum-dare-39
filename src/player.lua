@@ -1,4 +1,5 @@
 -- utils
+local colliderUtils = require 'utils.colliderUtils'
 local vectorUtils = require 'utils.vectorUtils'
 
 -- constants
@@ -24,6 +25,7 @@ local Timer = require 'src.timer'
 local Player = class('Player')
 
 function Player:initialize(spawnVector)
+  self.name = 'Player'
   self.position = spawnVector
   -- self.tween = Tween:new()
   self.width = tileSize
@@ -41,15 +43,11 @@ function Player:initialize(spawnVector)
   self.velocity = zeroVector
   self.speed = 100
   self.actionKey = false
+  self.hasCrystal = false
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 2.2, tileSize / 2.2)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
   self.collider:setObject(self)
-  self.collider:setPreSolve(function(c1, c2, contact)
-    if c1.collision_class == 'Player' and c2.collision_class == 'Crystal' then
-      contact:setEnabled(false)
-    end
-  end)
 end
 
 function Player:hasFinishedMap()
@@ -58,9 +56,7 @@ end
 
 function Player:update(dt)
   self:movementWithKeys(dt)
-  local x, y = self.collider:getPosition()
-  self.position.x = x - tileSize / 2
-  self.position.y = y - tileSize / 2
+  self.position = colliderUtils.getPosition(self.collider)
   self:updateCollider(dt)
 end
 
@@ -72,6 +68,7 @@ function Player:updateCollider(dt)
   end
   if colliders then
     local crystal = nil
+    local crystalObject = nil
     for i = 1, #colliders do
       if colliders[i].collision_class == 'Crystal' then
         crystal = colliders[i]
@@ -84,10 +81,15 @@ function Player:updateCollider(dt)
       local vx = px - cx
       local vy = py - cy
       crystal:setLinearVelocity(vx * 10, vy * 10)
+      local obj = crystal:getObject()
+      obj.pickedUp = true
+      self.hasCrystal = true
     else
+      self.hasCrystal = false
       self.actionKey = false
     end
   end
+  print(self.hasCrystal)
 end
 
 function Player:movementWithKeys()

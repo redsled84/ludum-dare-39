@@ -22,6 +22,7 @@ world:addCollisionClass('Cell')
 world:addCollisionClass('Crystal')
 world:addCollisionClass('Door')
 world:addCollisionClass('Player')
+world:addCollisionClass('Terminal')
 
 -- TODO: implement animations
 -- src
@@ -31,6 +32,7 @@ local Door = require 'src.door'
 local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
+local Terminal = require 'src.terminal'
 
 local Game = class('Game')
 
@@ -48,33 +50,29 @@ function Game:initialize(firstTime)
 
   local grid = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 0, 0, 1, 1, 1, 0, 1},
-    {1, 1, 0, 0, 0, 1, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
-    {1, 0, 0, 0, 0, 1, 1, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 3, 1, 1, 0, 2, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1, 4, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1, 0, 0, 4, 0, 1},
+    {1, 0, 0, 0, 3, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 0, 0, 0, 2, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 0, 1, 0, 0, 1},
+    {1, 0, 2, 0, 0, 0, 1, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   }
   local gridHeight = #grid
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
-
   
-  Player:initialize(vector(2*tileSize, 4*tileSize))
+  Player:initialize(vector(2*tileSize, 6*tileSize))
   
   self.Cells = {}
-  self.Items = {}
-  self.Doors = {}
   self.state = 'game_start'
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
+  self.Entities = {Player}
   self:createColliders(grid, gridWidth, gridHeight)
-
-  self.Entities = {Player, unpack(self.Items), unpack(self.Doors)}
 
   -- post_shader = PostShader()
   -- post_shader:toggleEffect("blur", 2.0, 2.0)
@@ -82,21 +80,24 @@ function Game:initialize(firstTime)
 end
 
 function Game:createColliders(grid, gridWidth, gridHeight)
-  for y = 1, gridHeight do
-    for x = 1, gridWidth do
-      local val = grid[y][x]
-      local px, py = x * tileSize, y * tileSize
-      if val == 1 then
-        self.Cells[#self.Cells+1] = Cell:new(vector(px, py))
-      end
-      if val == 2 then
-        self.Items[#self.Items+1] = Crystal:new(vector(px, py), 5)
-      end
-      if val == 3 then
-        self.Doors[#self.Doors+1] = Door:new(vector(px, py))
-      end
+  Map:loopGrid(function(x, y, val)
+    local px, py = x * tileSize, y * tileSize
+    if val == 1 then
+      self.Cells[#self.Cells+1] = Cell:new(vector(px, py))
     end
-  end
+    if val == 2 then
+      self.Entities[#self.Entities+1] = Crystal:new(vector(px, py), 5)
+    end
+    if val == 4 then
+      self.Entities[#self.Entities+1] = Terminal:new(vector(px, py))
+    end
+  end)
+  Map:loopGrid(function(x, y, val)
+    local px, py = x * tileSize, y * tileSize
+    if val == 3 then
+      self.Entities[#self.Entities+1] = Door:new(vector(px, py))
+    end
+  end)
 end
 
 function Game:update(dt)
@@ -106,7 +107,13 @@ function Game:update(dt)
 
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
-      entity:update(dt)
+      if entity.name ~= 'Door' then
+        entity:update(dt)
+      else
+        -- for now this gets all the terminals, but we can change it to lists of specific terminals
+        local terminals = self:getEntities('Terminal')
+        entity:update(dt, terminals)
+      end
     end
 
     local camX, camY = Player.position.x, Player.position.y
@@ -121,6 +128,16 @@ function Game:update(dt)
   if self.state == 'level_change' then
     self:initialize(false)
   end
+end
+
+function Game:getEntities(name)
+  local temp = {}
+  for i = 1, #self.Entities do
+    if self.Entities[i].name == name then
+      table.insert(temp, self.Entities[i])
+    end
+  end
+  return temp
 end
 
 function Game:print()
@@ -143,8 +160,7 @@ function Game:draw(bool)
       Map:drawLayer('stair')
       Map:drawLayer('wall')
 
-      self:drawItems(true)
-      self:drawDoors(true)
+      self:drawEntities(true)
 
       Player:draw()
     -- end)
@@ -162,19 +178,15 @@ function Game:draw(bool)
   self:drawDebug(false)
 end
 
-function Game:drawItems(bool)
+function Game:drawEntities(bool)
   if not bool then return end
-  for i = 1, #self.Items do
-    local item = self.Items[i]
-    item:draw()
-  end
-end
-
-function Game:drawDoors(bool)
-  if not bool then return end
-  for i = 1, #self.Doors do
-    local door = self.Doors[i]
-    door:draw()
+  for i = 1, #self.Entities do
+    local entity = self.Entities[i]
+    if entity.name ~= 'Player' then
+      entity:draw()
+      love.graphics.setColor(255,255,255,80)
+      love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
+    end
   end
 end
 

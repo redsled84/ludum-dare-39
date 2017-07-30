@@ -1,8 +1,11 @@
+local colliderUtils = require 'utils.colliderUtils'
+
 local class = require 'libs.middleclass'
 
 local Door = class('Door')
 
-function Door:initialize(position, open)
+function Door:initialize(position, terminals, open)
+  self.name = 'Door'
   self.position = position
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize, tileSize/2)
   self.collider:setType('static')
@@ -20,15 +23,21 @@ function Door:initialize(position, open)
   end)
 end
 
-function Door:update(dt)
-  local x, y = self.collider:getPosition()
-  self.position.x = x - tileSize / 2
-  self.position.y = y - tileSize / 2
-  if self.collider:enter('Player') then
-    self.open = true
-  end
-  if self.collider:exit('Player') then
-    self.open = false
+function Door:update(dt, terminals)
+  self.position = colliderUtils.getPosition(self.collider)
+  if terminals then
+    local count = 0
+    for i = 1, #terminals do
+      local terminal = terminals[i]
+      if terminal.hasCrystal then
+        count = count + 1
+      end
+    end
+    if count >= #terminals then
+      self.open = true
+    else
+      self.open = false
+    end
   end
 end
 
