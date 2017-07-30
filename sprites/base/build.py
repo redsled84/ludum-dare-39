@@ -22,13 +22,23 @@ def main():
 
     for arg in args.input_files:
         im = None
+        print 'Recoloring {}'.format(arg)
         with open(arg) as f:
             im = skio.imread(f)
+        print im.shape
         im_r = im[:,:,0]
         w, h = im_r.shape
+
+        if im.shape[2] == 3:
+            print 'Warning: Alpha channel missing. Adding basic alpha channel.'
+            rgba_list = np.dsplit(im, 3)
+            rgba_list.append(255 * np.ones((w, h, 1)).astype(np.uint8))
+            im = np.dstack(rgba_list)
+            print im.shape
+
         layers = []
         for i in xrange(0, 256, incr):
-            layers.append(im_r == i)
+            layers.append(np.logical_and(im_r >= i, im_r < i+incr))
 
         im_comp = np.zeros(im.shape).astype(np.uint8)
         for i, layer in enumerate(layers):
