@@ -1,2 +1,2 @@
 all:
-	python build.py *.png --palette lucas1.txt --output-dir ../
+	python build.py *.png --palette game_palette.txt --output-dir ../

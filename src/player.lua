@@ -26,8 +26,8 @@ function Player:initialize(spawnVector)
   self.hasItem = false
   self.dir = 'left'
   self.sprites = {
-    idle = love.graphics.newImage('sprites/stand.png'),
-    run = love.graphics.newImage('sprites/run.png')
+    idle = love.graphics.newImage('sprites/player_idle.png'),
+    run = love.graphics.newImage('sprites/player_run.png')
   }
   self.laserActive = false
   self.laserEnd = zeroVector
