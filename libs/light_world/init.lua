@@ -127,49 +127,47 @@ function light_world:drawShadows(l,t,w,h,s)
   love.graphics.setCanvas()
   for i = 1, #self.lights do
     local light = self.lights[i]
-    if light:isVisible() then
-      -- create shadow map for this light
-      love.graphics.setCanvas( self.shadowMap )
-      love.graphics.clear()
-      love.graphics.setCanvas()
-      util.drawto(self.shadowMap, l, t, s, function()
-        --I dont know if it uses both or just calls both
-        love.graphics.stencil(function()
-          local angle = light.direction - (light.angle / 2.0)
-          love.graphics.arc("fill", light.x, light.y, light.range, angle, angle + light.angle)
-        end)
-        love.graphics.setStencilTest("greater",0)
-        love.graphics.stencil(function()
-          love.graphics.setShader(self.image_mask)
-          for k = 1, #self.bodies do
-            if self.bodies[k]:inLightRange(light) and self.bodies[k]:isVisible() then
-              self.bodies[k]:drawStencil()
-            end
-          end
-          love.graphics.setShader()
-        end)
-        love.graphics.setStencilTest("equal", 0)
+    -- create shadow map for this light
+    love.graphics.setCanvas( self.shadowMap )
+    love.graphics.clear()
+    love.graphics.setCanvas()
+    util.drawto(self.shadowMap, l, t, s, function()
+      --I dont know if it uses both or just calls both
+      love.graphics.stencil(function()
+        local angle = light.direction - (light.angle / 2.0)
+        love.graphics.arc("fill", light.x, light.y, light.range, angle, angle + light.angle)
+      end)
+      love.graphics.setStencilTest("greater",0)
+      love.graphics.stencil(function()
+        love.graphics.setShader(self.image_mask)
         for k = 1, #self.bodies do
           if self.bodies[k]:inLightRange(light) and self.bodies[k]:isVisible() then
-            self.bodies[k]:drawShadow(light)
+            self.bodies[k]:drawStencil()
           end
         end
+        love.graphics.setShader()
       end)
-      -- draw scene for this light using normals and shadowmap
-      self.shadowShader:send('lightColor', {light.red / 255.0, light.green / 255.0, light.blue / 255.0})
-      self.shadowShader:send("lightPosition", {(light.x + l/s) * s, (light.y + t/s) * s, (light.z * 10) / 255.0})
-      self.shadowShader:send('lightRange',light.range * s)
-      self.shadowShader:send("lightSmooth", light.smooth)
-      self.shadowShader:send("lightGlow", {1.0 - light.glowSize, light.glowStrength})
-      util.drawCanvasToCanvas(self.shadowMap, self.shadow_buffer, {
-        blendmode = 'add',
-        shader = self.shadowShader,
-        stencil = function()
-          local angle = light.direction - (light.angle / 2.0)
-          love.graphics.arc("fill", (light.x + l/s) * s, (light.y + t/s) * s, (light.range*4), angle, angle + light.angle)
+      love.graphics.setStencilTest("equal", 0)
+      for k = 1, #self.bodies do
+        if self.bodies[k]:inLightRange(light) and self.bodies[k]:isVisible() then
+          self.bodies[k]:drawShadow(light)
         end
-      })
-    end
+      end
+    end)
+    -- draw scene for this light using normals and shadowmap
+    self.shadowShader:send('lightColor', {light.red / 255.0, light.green / 255.0, light.blue / 255.0})
+    self.shadowShader:send("lightPosition", {(light.x + l/s) * s, (light.y + t/s) * s, (light.z * 10) / 255.0})
+    self.shadowShader:send('lightRange',light.range * s)
+    self.shadowShader:send("lightSmooth", light.smooth)
+    self.shadowShader:send("lightGlow", {1.0 - light.glowSize, light.glowStrength})
+    util.drawCanvasToCanvas(self.shadowMap, self.shadow_buffer, {
+      blendmode = 'add',
+      shader = self.shadowShader,
+      stencil = function()
+        local angle = light.direction - (light.angle / 2.0)
+        love.graphics.arc("fill", (light.x + l/s) * s, (light.y + t/s) * s, (light.range*4), angle, angle + light.angle)
+      end
+    })
   end
 
   -- add in ambient color

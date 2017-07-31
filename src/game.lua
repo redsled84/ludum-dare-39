@@ -46,7 +46,7 @@ function Game:initialize(firstTime)
   main_theme:setVolume(.3)
 
   love.graphics.setDefaultFilter('nearest', 'nearest')
-  lightRange = 100
+  lightRange = 150
   lightSmooth = 1.0
 
   lightWorld = LightWorld({
@@ -57,11 +57,6 @@ function Game:initialize(firstTime)
     w = love.graphics.getWidth() / 4,
     h = love.graphics.getHeight() / 4
   })
-
-  lightPlayer = lightWorld:newLight(0, 0, 255, 191, 127, lightRange)
-  lightPlayer:setGlowStrength(0.2)
-  lightPlayer:setSmooth(lightSmooth)
-  lightPlayer.z = 1.5
 
   self.Lights = {}
   self.LightBodies = {}
@@ -107,7 +102,10 @@ function Game:createColliders(grid, gridWidth, gridHeight)
       local r = math.random(0, 255)
       local g = math.random(0, 255)
       local b = math.random(0, 255)
-      self.Lights[#self.Lights+1] = { light=lightWorld:newLight(px, py, r, g, b, lightRange), crystal=crystal }
+      local light = lightWorld:newLight(px, py, 150, 150, 150, lightRange)
+      light.z = 6
+      self.Lights[#self.Lights+1] = { light=light, crystal=crystal }
+
     end
     if val == 5 then
       self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
@@ -206,7 +204,6 @@ end
 function Game:updateLights()
   for i = 1, #self.Lights do
     local light = self.Lights[i]
-    print(light.light)
     light.light:setPosition(light.crystal.position.x+tileSize/2, light.crystal.position.y+tileSize/2)
   end
 end
