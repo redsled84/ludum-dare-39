@@ -99,11 +99,13 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 2 then
       local crystal = Crystal:new(vector(px, py), 5)
       self.Entities[#self.Entities+1] = crystal
-      local r = math.random(0, 255)
-      local g = math.random(0, 255)
-      local b = math.random(0, 255)
-      local light = lightWorld:newLight(px, py, 150, 150, 150, lightRange)
-      light.z = 6
+
+      local r = math.random(50, 255)
+      local g = math.random(50, 255)
+      local b = math.random(50, 255)
+      local light = lightWorld:newLight(px, py, r, r, r, lightRange)
+      light.z = 9
+
       self.Lights[#self.Lights+1] = { light=light, crystal=crystal }
 
     end

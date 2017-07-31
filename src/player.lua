@@ -65,7 +65,7 @@ function Player:initialize(spawnVector)
   self.speed = 60
   self.actionKey = false
   self.hasCrystal = false
-  self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 2.2, tileSize / 2.2)
+  self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2.8)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
   self.collider:setObject(self)

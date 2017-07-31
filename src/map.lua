@@ -19,7 +19,6 @@ local spriteNums = {
 
 -- libs
 local class = require 'libs.middleclass'
-local ml = require 'libs.ml'
 local io = require 'io'
 local vector = require 'libs.vector'
 
@@ -83,9 +82,9 @@ function Map:initializeEmptyGrid()
   for y = 1, self.gridHeight do
     local temp = {}
     for x = 1, self.gridWidth do
-      ml.extend(temp, {0})
+      temp[#temp+1] = 0
     end
-    ml.extend(self.Grid, {temp})
+    table.insert(self.Grid, temp)
   end
 end
 
