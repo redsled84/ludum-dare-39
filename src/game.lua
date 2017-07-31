@@ -103,7 +103,7 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
     if val == 2 then
-      local crystal = Crystal:new(vector(px+tileSize/2, py+tileSize/2), 5)
+      local crystal = Crystal:new(vector(px+tileSize/3, py+tileSize/3), 5)
       self.Entities[#self.Entities+1] = crystal
       local greyscale = math.random(75, 235)
       local light = lightWorld:newLight(px, py, greyscale, greyscale, greyscale, lightRange)
