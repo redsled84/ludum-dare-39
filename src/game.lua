@@ -244,11 +244,11 @@ function Game:draw(bool)
     HUD:draw(Player)
     love.graphics.setColor(255,255,255)
     local w, h = love.graphics.getWidth()/2, love.graphics.getHeight()/2
-    love.graphics.rectangle('line', 0, 0, 64, 64)
-    love.graphics.rectangle('line', 0, 0, w, h)
-    love.graphics.rectangle('line', 0, h, w, h)
-    love.graphics.rectangle('line', w, 0, w, h)
-    love.graphics.rectangle('line', w, h, w, h)
+    -- love.graphics.rectangle('line', 0, 0, 64, 64)
+    -- love.graphics.rectangle('line', 0, 0, w, h)
+    -- love.graphics.rectangle('line', 0, h, w, h)
+    -- love.graphics.rectangle('line', w, 0, w, h)
+    -- love.graphics.rectangle('line', w, h, w, h)
   elseif self.state == 'game_over' then
     -- TODO: change game over screen with player dying animation and restarting game
     love.graphics.setColor(255,0,0)
