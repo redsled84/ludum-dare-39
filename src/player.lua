@@ -85,7 +85,7 @@ function Player:handleShoot(dt, Projectiles)
         self.position.y + tileSize/2
       ),
       DIR2VEC[self.dir],
-      {self.collider}
+      {}
     )
     self.shootTimer = SHOOT_COOLDOWN
   end
