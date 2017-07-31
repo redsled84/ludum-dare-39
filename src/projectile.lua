@@ -22,20 +22,30 @@ function Projectile:initialize(position, velocity, ignoredColliders)
   end)
 end
 
+function Projectile:shouldIgnore(collider)
+  for i = 1, #self.ignored do
+    if self.ignored[i] == collider then
+      print 'yatta'
+      return true
+    end
+  end
+end
+
 function Projectile:update(dt)
   if self.collider:enter('Crystal') then
     -- get collision position
     local collision_data = self.collider:getEnterCollisionData('Crystal')
-    if self:shouldIgnore(collision_data.collider) then break end
-    local x, y = collision_data.collider:getPosition()
-    -- create new projectiles at the collision position
-    local pos = vector(x, y)
-    local v1 = vector(self.velocity.y, self.velocity.x)
-    local v2 = -v1
-    Projectiles[#Projectiles+1] = Projectile:new(pos, v1, {collision_data.collider})
-    Projectiles[#Projectiles+1] = Projectile:new(pos, v2, {collision_data.collider})
-    -- destroy collider
-    self.collider:destroy()
+    if not self:shouldIgnore(collision_data.collider) then
+      local x, y = collision_data.collider:getPosition()
+      -- create new projectiles at the collision position
+      local pos = vector(x, y)
+      local v1 = vector(self.velocity.y, self.velocity.x)
+      local v2 = -v1
+      Projectiles[#Projectiles+1] = Projectile:new(pos, v1, {collision_data.collider})
+      Projectiles[#Projectiles+1] = Projectile:new(pos, v2, {collision_data.collider})
+      -- destroy collider
+      self.collider:destroy()
+    end
   end
   if self.collider:enter('Cell') then
     self.collider:destroy()
