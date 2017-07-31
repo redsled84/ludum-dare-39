@@ -89,7 +89,10 @@ end
 function Player:update(dt)
   self:movementWithKeys(dt)
   self.position = colliderUtils.getPosition(self.collider)
-  self:updateCollider(dt)
+  --self:updateCollider(dt)
+  if self.item ~= nil then
+    self:updateItem(dt)
+  end
   self:updateParticles()
   self.psystem:update(dt)
 end
@@ -114,11 +117,15 @@ function Player:handleShoot(dt, Projectiles)
   end
 end
 
+function Player:updateItem(dt)
+  self.item.collider:setPosition(self.collider:getPosition())
+end
+
 function Player:updateCollider(dt)
   local colliders
   if self.actionKey then
     local x, y = self.collider:getPosition()
-    colliders = world:queryCircleArea(x, y, 20, {'Crystal'})
+    colliders = world:queryCircleArea(x, y, tileSize, {'Crystal', 'Terminal'})
   end
   if colliders then
     local crystal = nil
@@ -127,13 +134,26 @@ function Player:updateCollider(dt)
         crystal = colliders[i]
         break
       end
+      if colliders[i].collision_class == 'Terminal' then
+        terminal = colliders[i]
+        break
+      end
     end
+    if terminal and self.hasItem then
+      self.item.collider:setPosition(terminal:getPosition())
+      self.item.pickedUp = false
+      self.item.placed = true
+    end
+
     if crystal then
       local cx, cy = crystal:getPosition()
       local px, py = self.collider:getPosition()
+      py = py - tileSize * 3/4
+      crystal:setPosition(px, py)
+
       local vx = px - cx
       local vy = py - cy
-      crystal:setLinearVelocity(vx * 10, vy * 10)
+      --crystal:setLinearVelocity(vx * 10, vy * 10)
       local obj = crystal:getObject()
       obj.pickedUp = true
       obj.placed = false
@@ -152,7 +172,7 @@ function Player:movementWithKeys()
     self.dir = 'right'
   elseif KEYS['a'] then
     self.velocity.x = -self.speed
-    self.dir = 'left'    
+    self.dir = 'left'
   elseif not KEYS['a'] and not KEYS['d'] then
     self.velocity.x = 0
   end
@@ -256,6 +276,32 @@ function Player:keypressed(key)
   end
   if key == 'f' then
     self.actionKey = not self.actionKey
+  end
+  if key == 'e' then
+    self:action()
+  end
+end
+
+function Player:action()
+  local x, y = self.collider:getPosition()
+  if self.item ~= nil then
+    local colliders = world:queryCircleArea(x, y, tileSize, {'Terminal'})
+    if #colliders == 0 then
+      -- drop the crystal
+      self.item = nil
+    else
+      -- put the crystal in the terminal
+      local terminal_collider = colliders[1]
+      self.item.collider:setPosition(terminal_collider:getPosition())
+      self.item = nil
+    end
+
+  else
+    local colliders = world:queryCircleArea(x, y, tileSize, {'Crystal'})
+    if #colliders == 0 then return end
+    local crystal_collider = colliders[1]
+    self.item = crystal_collider:getObject()
+    self.item.pickedUp = true
   end
 end
 
