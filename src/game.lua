@@ -21,6 +21,7 @@ world = wf.newWorld(0, 0, true)
 world:addCollisionClass('Cell')
 world:addCollisionClass('Crystal')
 world:addCollisionClass('Door')
+world:addCollisionClass('Gap')
 world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
 world:addCollisionClass('Projectile', {ignore={'Player'}})
@@ -35,6 +36,7 @@ local Map = require 'src.map'
 local Player = require 'src.player'
 local Terminal = require 'src.terminal'
 local Levels = require 'src.levels'
+local Gap = require 'src.gap'
 
 local Game = class('Game')
 
@@ -86,6 +88,9 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 4 then
       local terminal = Terminal:new(vector(px, py))
       self.Entities[#self.Entities+1] = terminal
+    end
+    if val == 5 then
+      self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
     end
   end)
 end
