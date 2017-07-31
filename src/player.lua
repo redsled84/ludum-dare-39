@@ -6,7 +6,7 @@ local vectorUtils = require 'utils.vectorUtils'
 local powerDecrement = 0.1
 local laserCost = 0.5
 local zeroVector = vectorUtils.getZeroVector()
-local SHOOT_COOLDOWN = 2.0
+local SHOOT_COOLDOWN = 1.0
 local KEYS = {
   w = false,
   s = false,
@@ -79,7 +79,19 @@ function Player:handleShoot(dt, Projectiles)
   end
   -- fire projectile
   if KEYS['space'] and Projectiles then
-    Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir], {self.collider})
+    local x, y = self.position:unpack()
+    if self.dir == 'up' then
+      x = x - tileSize / 6
+      y = y - 12
+    elseif self.dir == 'down' then
+      x = x - tileSize / 6
+      y = y + tileSize / 2
+    elseif self.dir == 'right' then
+      x = x + tileSize / 2
+    elseif self.dir == 'left' then
+      x = x - tileSize / 2
+    end
+    Projectiles[#Projectiles+1] = Projectile:new(vector(x, y), DIR2VEC[self.dir], {self.collider})
     self.shootTimer = SHOOT_COOLDOWN
   end
 end
