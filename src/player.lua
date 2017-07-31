@@ -79,7 +79,14 @@ function Player:handleShoot(dt, Projectiles)
   end
   -- fire projectile
   if KEYS['space'] and Projectiles then
-    Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir], {self.collider})
+    Projectiles[#Projectiles+1] = Projectile:new(
+      vector(
+        self.position.x + tileSize/2,
+        self.position.y + tileSize/2
+      ),
+      DIR2VEC[self.dir],
+      {self.collider}
+    )
     self.shootTimer = SHOOT_COOLDOWN
   end
 end
