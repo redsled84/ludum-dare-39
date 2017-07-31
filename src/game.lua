@@ -95,22 +95,21 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 4 then
       self.Entities[#self.Entities+1] = Terminal:new(vector(px, py))
     end
+    if val == 5 then
+      self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
+    end
+  end)
+  Map:loopGrid(function(x, y, val)
+    local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
     if val == 2 then
       local crystal = Crystal:new(vector(px, py), 5)
       self.Entities[#self.Entities+1] = crystal
-
-      local r = math.random(50, 255)
-      local g = math.random(50, 255)
-      local b = math.random(50, 255)
-      local light = lightWorld:newLight(px, py, r, r, r, lightRange)
+      local greyscale = math.random(75, 235)
+      local light = lightWorld:newLight(px, py, greyscale, greyscale, greyscale, lightRange)
       light.z = 9
 
       self.Lights[#self.Lights+1] = { light=light, crystal=crystal }
-
-    end
-    if val == 5 then
-      self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
     end
   end)
 end
@@ -231,6 +230,7 @@ function Game:draw(bool)
       Map:drawLayer('stair')
       Map:drawLayer('wall')
 
+      Player:drawParticles()
       self:drawEntities(true)
       self:drawProjectiles(true)
 

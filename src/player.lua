@@ -15,6 +15,7 @@ local KEYS = {
   a = false,
   space = false,
 }
+local MAX_PARTICLES = 16
 
 -- libs
 local class = require 'libs.middleclass'
@@ -49,6 +50,7 @@ function Player:initialize(spawnVector)
     down = love.graphics.newImage('sprites/player_down.png'),
     left = love.graphics.newImage('sprites/player_left.png'),
     right = love.graphics.newImage('sprites/player_right.png'),
+    particle = love.graphics.newImage('sprites/particle.png')
   }
   self.sounds = {
     pickup = {
@@ -69,6 +71,15 @@ function Player:initialize(spawnVector)
   self.collider:setCollisionClass(self.name)
   self.collider:setFixedRotation(true)
   self.collider:setObject(self)
+  self.psystem = love.graphics.newParticleSystem(self.sprites.particle, MAX_PARTICLES)
+  -- between 0.5 and 1.0 seconds
+  self.psystem:setParticleLifetime(0.25, .5)
+  self.psystem:setSizeVariation(1)
+  self.psystem:setSpread(.5)
+  self.psystem:setSpin(math.pi/6, math.pi)
+  self.psystem:setSpinVariation(.8)
+  self.psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0)
+  self.psystem:setLinearDamping(-.8, -.1)
 end
 
 function Player:hasFinishedMap()
@@ -79,6 +90,8 @@ function Player:update(dt)
   self:movementWithKeys(dt)
   self.position = colliderUtils.getPosition(self.collider)
   self:updateCollider(dt)
+  self:updateParticles()
+  self.psystem:update(dt)
 end
 
 function Player:handleShoot(dt, Projectiles)
@@ -139,7 +152,7 @@ function Player:movementWithKeys()
     self.dir = 'right'
   elseif KEYS['a'] then
     self.velocity.x = -self.speed
-    self.dir = 'left'
+    self.dir = 'left'    
   elseif not KEYS['a'] and not KEYS['d'] then
     self.velocity.x = 0
   end
@@ -155,6 +168,32 @@ function Player:movementWithKeys()
   self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
 end
 
+function Player:updateParticles()
+  if love.keyboard.isDown('d') then
+    self.psystem:setSpeed(-self.speed)
+    self.psystem:setDirection(2*math.pi)
+    self.psystem:emit(2)
+  elseif love.keyboard.isDown('a') then
+    self.psystem:setSpeed(self.speed)
+    self.psystem:setDirection(0)
+    self.psystem:emit(2)
+  elseif love.keyboard.isDown('s') then
+    self.psystem:setSpeed(-self.speed)
+    self.psystem:setDirection(math.pi/2)
+    self.psystem:emit(2)
+  elseif love.keyboard.isDown('w') then
+    self.psystem:setSpeed(self.speed)
+    self.psystem:setDirection(4.5*math.pi)
+    self.psystem:emit(2)
+  end
+end
+
+function Player:resetParticles(once)
+  if self.psystem:isActive() then
+    self.psystem:reset()
+  end
+end
+
 function Player:checkItems(Items)
   for i = 1, #Items do
     local item = Items[i]
@@ -168,6 +207,18 @@ end
 
 function Player:draw()
   self:drawSprites()
+end
+
+function Player:drawParticles()
+  if self.dir == 'right' then
+    love.graphics.draw(self.psystem, self.position.x + 7, self.position.y + tileSize - 3, 0, .25, .25)
+  elseif self.dir == 'left' then
+    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + tileSize - 3, 0, .25, .25)
+  elseif self.dir == 'up' then
+    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + tileSize - 3, 0, .25, .25)
+  elseif self.dir == 'down' then
+    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + 3, 0, .25, .25)
+  end
 end
 
 function Player:drawSprites()
@@ -189,6 +240,9 @@ function Player:drawDebug(bool)
 end
 
 function Player:keypressed(key)
+  if key and self.psystem:getCount() > MAX_PARTICLES then
+    self:resetParticles()
+  end
   for k, v in pairs(KEYS) do
     if k == key and not v then
       KEYS[k] = true
