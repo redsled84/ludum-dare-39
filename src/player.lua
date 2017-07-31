@@ -79,19 +79,14 @@ function Player:handleShoot(dt, Projectiles)
   end
   -- fire projectile
   if KEYS['space'] and Projectiles then
-    local x, y = self.position:unpack()
-    if self.dir == 'up' then
-      x = x - tileSize / 6
-      y = y - 12
-    elseif self.dir == 'down' then
-      x = x - tileSize / 6
-      y = y + tileSize / 2
-    elseif self.dir == 'right' then
-      x = x + tileSize / 2
-    elseif self.dir == 'left' then
-      x = x - tileSize / 2
-    end
-    Projectiles[#Projectiles+1] = Projectile:new(vector(x, y), DIR2VEC[self.dir], {self.collider})
+    Projectiles[#Projectiles+1] = Projectile:new(
+      vector(
+        self.position.x + tileSize/2,
+        self.position.y + tileSize/2
+      ),
+      DIR2VEC[self.dir],
+      {}
+    )
     self.shootTimer = SHOOT_COOLDOWN
   end
 end

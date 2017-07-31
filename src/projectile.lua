@@ -35,7 +35,7 @@ function Projectile:update(dt)
   if self.collider:enter('Crystal') then
     -- get collision position
     local collision_data = self.collider:getEnterCollisionData('Crystal')
-    if not self:shouldIgnore(collision_data.collider) then
+    if not self:shouldIgnore(collision_data.collider) and not collision_data.collider:getObject().pickedUp then
       local x, y = collision_data.collider:getPosition()
       -- create new projectiles at the collision position
       local pos = vector(x, y)
