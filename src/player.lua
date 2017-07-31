@@ -78,7 +78,7 @@ function Player:initialize(spawnVector)
   self.psystem:setSpread(.5)
   self.psystem:setSpin(math.pi/6, math.pi)
   self.psystem:setSpinVariation(.8)
-  self.psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0)
+  self.psystem:setColors(210, 210, 210, 240, 75, 75, 75, 0)
   self.psystem:setLinearDamping(-.8, -.1)
 end
 
