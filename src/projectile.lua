@@ -15,14 +15,21 @@ function Projectile:initialize(position, velocity)
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 3.5, tileSize / 3.5)
   self.collider:setCollisionClass('Projectile')
   self.collider:setLinearVelocity(SPEED * velocity.x, SPEED * velocity.y)
-  self.collider:setPostSolve(function(c1, c2, contact)
-    if c1.collision_class == 'Projectile' and c2.collision_class ~= 'Player' then
-      self.collider:destroy()
-    end
+  -- By default, don't collide with anything.
+  self.collider:setPreSolve(function(c1, c2, contact)
+    contact:setEnabled(false)
   end)
 end
 
 function Projectile:update(dt)
+  if self.collider:enter('Crystal') then
+    print('crystal!')
+    self.collider:destroy()
+  end
+  if self.collider:enter('Cell') then
+    print('crystal!')
+    self.collider:destroy()
+  end
   if not self.collider:isDestroyed() then
     local x, y = self.collider:getPosition()
     self.position.x = x - tileSize / 2
