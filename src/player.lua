@@ -103,7 +103,7 @@ function Player:handleShoot(dt, Projectiles)
     return
   end
   -- fire projectile
-  if KEYS['space'] and Projectiles and self.actionKey then
+  if KEYS['space'] and Projectiles and self.item ~= nil then
     Projectiles[#Projectiles+1] = Projectile:new(
       vector(
         self.position.x + tileSize/2,
@@ -284,7 +284,7 @@ end
 function Player:action()
   local x, y = self.collider:getPosition()
   if self.item ~= nil then
-    local colliders = world:queryCircleArea(x, y, tileSize, {'Terminal'})
+    local colliders = world:queryCircleArea(x, y, tileSize * 2/3, {'Terminal'})
     if #colliders == 0 then
       -- drop the crystal
       self.item = nil
@@ -298,7 +298,7 @@ function Player:action()
     end
 
   else
-    local colliders = world:queryCircleArea(x, y, tileSize, {'Crystal'})
+    local colliders = world:queryCircleArea(x, y, tileSize * 2/3, {'Crystal'})
     if #colliders == 0 then return end
     local crystal_collider = colliders[1]
     self.item = crystal_collider:getObject()
