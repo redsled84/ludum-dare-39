@@ -274,9 +274,6 @@ function Player:keypressed(key)
       KEYS[k] = true
     end
   end
-  if key == 'f' then
-    self.actionKey = not self.actionKey
-  end
   if key == 'e' then
     self:action()
   end
@@ -304,6 +301,7 @@ function Player:action()
     local crystal_collider = colliders[1]
     self.item = crystal_collider:getObject()
     self.item.pickedUp = true
+    audioUtils.play(self.sounds.pickup.source, not self.item.pickedUp)
   end
 end
 
