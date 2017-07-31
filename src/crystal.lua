@@ -19,9 +19,7 @@ function Crystal:initialize(position, strength)
   self.collider:setLinearDamping(10)
   self.collider:setObject(self)
   self.collider:setPreSolve(function(c1, c2, contact)
-    if c1.collision_class == 'Crystal' and (c2.collision_class == 'Player' or c2.collision_class == 'Terminal') then
-      contact:setEnabled(false)
-    end
+    contact:setEnabled(false)
   end)
 end
 
@@ -29,7 +27,7 @@ function Crystal:update(dt, terminals)
   self.position = colliderUtils.getPosition(self.collider)
   if not self.pickedUp then
     local x, y = self.collider:getPosition()
-    
+
     if terminals then
       local term
       for i = 1, #terminals do
