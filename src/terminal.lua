@@ -56,6 +56,14 @@ function Terminal:update(dt)
 end
 
 function Terminal:draw()
+  if not self.hasCrystal then
+    love.graphics.setColor(255,100,100)
+  else
+    love.graphics.setColor(100,255,185)
+  end
+  if self.isTempOn then
+    love.graphics.setColor(60,145,255)
+  end
   love.graphics.draw(self.sprite, self.position.x, self.position.y)
 end
 

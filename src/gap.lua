@@ -21,6 +21,7 @@ function Gap:draw()
   local x, y = self.collider:getPosition()
   x = x - tileSize / 2
   y = y - tileSize / 2
+  love.graphics.setColor(255,255,255)
   love.graphics.draw(self.sprite, x, y)
 end
 
