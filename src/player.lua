@@ -118,7 +118,8 @@ function Player:handleShoot(dt, Projectiles)
 end
 
 function Player:updateItem(dt)
-  self.item.collider:setPosition(self.collider:getPosition())
+  local x, y = self.collider:getPosition()
+  self.item.collider:setPosition(x, y - tileSize / 3)
 end
 
 function Player:updateCollider(dt)
@@ -249,12 +250,12 @@ end
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
   love.graphics.setColor(255,255,255)
-  -- draw held item
-  if self.hasItem then
-    love.graphics.draw(self.sprites['crystal'], x, y - 4)
-  end
   -- draw player sprite
   love.graphics.draw(self.sprites[self.dir], x, y)
+  -- draw held item
+  if self.item ~= nil then
+    self.item:draw()
+  end
 end
 
 function Player:drawDebug(bool)
@@ -287,6 +288,7 @@ function Player:action()
     local colliders = world:queryCircleArea(x, y, tileSize * 2/3, {'Terminal'})
     if #colliders == 0 then
       -- drop the crystal
+      self.item.pickedUp = false
       self.item = nil
     else
       -- put the crystal in the terminal
@@ -294,6 +296,8 @@ function Player:action()
       local terminal = terminal_collider:getObject()
       if terminal.hasCrystal then return end
       self.item.collider:setPosition(terminal_collider:getPosition())
+      self.item.pickedUp = false
+      terminal:putCrystal()
       self.item = nil
     end
 

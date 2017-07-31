@@ -46,13 +46,21 @@ function Terminal:update(dt)
   end
   -- self.position = colliderUtils.getPosition(self.collider)
   if self.collider:enter('Crystal') then
-    audioUtils.play(self.sounds.placed.source, self.sounds.placed.once)
-    self.hasCrystal = true
+    local collision_data = self.collider:getEnterCollisionData('Crystal')
+    local crystal = collision_data.collider:getObject()
+    if not crystal.pickedUp then
+      self:putCrystal()
+    end
   end
   if self.collider:exit('Crystal') then
     self.hasCrystal = false
   end
   self.sounds.placed.once = self.hasCrystal
+end
+
+function Terminal:putCrystal()
+  audioUtils.play(self.sounds.placed.source, self.sounds.placed.once)
+  self.hasCrystal = true
 end
 
 function Terminal:draw()
