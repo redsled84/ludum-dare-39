@@ -36,7 +36,7 @@ function Crystal:update(dt, terminals)
         local terminal = terminals[i]
         local tx, ty = terminal.collider:getPosition()
         local dist = math.sqrt((tx - x)^2 + (ty-y)^2)
-        if dist < 12 and not terminal.hasKey then
+        if dist < 16 and not terminal.hasKey then
           term = terminal
         end
       end

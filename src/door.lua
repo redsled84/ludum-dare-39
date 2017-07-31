@@ -4,7 +4,7 @@ local class = require 'libs.middleclass'
 
 local Door = class('Door')
 
-function Door:initialize(position, terminals, open)
+function Door:initialize(position, open)
   self.name = 'Door'
   self.position = position
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize, tileSize/2)
@@ -16,6 +16,7 @@ function Door:initialize(position, terminals, open)
     close = love.graphics.newImage('sprites/door_closed.png'),
   }
   self.open = open or false
+  self.terminals = {}
   self.collider:setPreSolve(function(c1, c2, contact)
     if c1.collision_class == 'Door' and c2.collision_class == 'Player' then
       contact:setEnabled(not self.open)
@@ -23,8 +24,9 @@ function Door:initialize(position, terminals, open)
   end)
 end
 
-function Door:update(dt, terminals)
+function Door:update(dt)
   self.position = colliderUtils.getPosition(self.collider)
+  local terminals = self.terminals
   if terminals then
     local count = 0
     for i = 1, #terminals do

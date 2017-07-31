@@ -63,8 +63,9 @@ function Game:initialize(firstTime)
   -- enemies, walls. Each entity requires a position vector.
   self.Entities = {Player}
   self.Projectiles = {}
+  self.Links = createLinks(Levels)
   self:createColliders(grid, gridWidth, gridHeight)
-
+  self:linkTerminalsAndDoors()
   -- post_shader = PostShader()
   -- post_shader:toggleEffect("blur", 2.0, 2.0)
   -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
@@ -89,6 +90,28 @@ function Game:createColliders(grid, gridWidth, gridHeight)
   end)
 end
 
+function Game:linkTerminalsAndDoors()
+  local doors = self:getEntities('Door')
+  local terminals = self:getEntities('Terminal')
+  for i = 1, #doors do
+    local door = doors[i]
+    local terminalVectors = {}
+    for i = 1, #self.Links do
+      local link = self.Links[i]
+      if door.position.x == link.door.x and door.position.y == link.door.y then
+        terminalVectors = link.terminals
+        break
+      end
+    end
+    local terms = {}
+    for i = 1, #terminalVectors do
+      local term = self:findEntityByVector(terminals, terminalVectors[i])
+      terms[#terms+1] = term
+    end
+    door.terminals = terms
+  end
+end
+
 function Game:update(dt)
   Game:checkState()
   if self.state ~= 'game_over' then
@@ -97,8 +120,8 @@ function Game:update(dt)
       local entity = self.Entities[i]
       if entity.name == 'Player' then
         entity:update(dt)
-        entity:handleShoot(dt, self.Projectiles)
-      elseif entity.name == 'Door' or entity.name == 'Crystal' then
+        entity:handleShoot(dt, self.Projectiles)        
+      elseif entity.name == 'Crystal' then
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)
       else
@@ -137,6 +160,15 @@ function Game:getEntities(name)
     end
   end
   return temp
+end
+
+function Game:findEntityByVector(entities, v)
+  for i = 1, #entities do
+    local entity = entities[i]
+    if entity.position.x == v.x and entity.position.y == v.y then
+      return entity
+    end
+  end
 end
 
 function Game:print()
