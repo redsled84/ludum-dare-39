@@ -23,7 +23,7 @@ world:addCollisionClass('Crystal')
 world:addCollisionClass('Door')
 world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
-world:addCollisionClass('Projectile')
+world:addCollisionClass('Projectile', {ignore={'Player'}})
 
 -- TODO: implement animations
 -- src
@@ -118,9 +118,13 @@ function Game:update(dt)
         entity:update(dt, terminals)
       end
     end
-    for i = 1, #self.Projectiles do
+    for i = #self.Projectiles, 1, -1 do
       local proj = self.Projectiles[i]
-      proj:update(dt)
+      if proj.collider:isDestroyed() then
+        table.remove(self.Projectiles, i)
+      else
+        proj:update(dt)
+      end
     end
 
     local camX, camY = Player.position.x, Player.position.y
