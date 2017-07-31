@@ -76,7 +76,7 @@ function Player:handleShoot(dt, Projectiles)
     return
   end
   -- fire projectile
-  if KEYS['space'] and Projectiles then
+  if KEYS['space'] and Projectiles and self.actionKey then
     Projectiles[#Projectiles+1] = Projectile:new(
       vector(
         self.position.x + tileSize/2,
