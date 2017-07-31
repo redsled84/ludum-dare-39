@@ -212,9 +212,9 @@ end
 function Player:drawParticles()
   local scale = .158
   if self.dir == 'right' then
-    love.graphics.draw(self.psystem, self.position.x + 7, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 6, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'left' then
-    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + tileSize-5, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'up' then
     love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'down' then
