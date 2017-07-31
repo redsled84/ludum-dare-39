@@ -31,7 +31,7 @@ function Projectile:shouldIgnore(collider)
   end
 end
 
-function Projectile:update(dt)
+function Projectile:update(dt, Projectiles)
   if self.collider:enter('Crystal') then
     -- get collision position
     local collision_data = self.collider:getEnterCollisionData('Crystal')
@@ -41,8 +41,8 @@ function Projectile:update(dt)
       local pos = vector(x, y)
       local v1 = vector(self.velocity.y, self.velocity.x)
       local v2 = -v1
-      Projectiles[#Projectiles+1] = Projectile:new(pos, v1, {collision_data.collider})
-      Projectiles[#Projectiles+1] = Projectile:new(pos, v2, {collision_data.collider})
+      table.insert(Projectiles, Projectile:new(pos, v1, {collision_data.collider}))
+      table.insert(Projectiles, Projectile:new(pos, v2, {collision_data.collider}))
       -- destroy collider
       self.collider:destroy()
     end
@@ -50,16 +50,15 @@ function Projectile:update(dt)
   if self.collider:enter('Cell') then
     self.collider:destroy()
   end
-  if not self.collider:isDestroyed() then
-    local x, y = self.collider:getPosition()
-    self.position.x = x - tileSize / 2
-    self.position.y = y - tileSize / 2
-  end
 end
 
 function Projectile:draw()
-  local x, y = self.position.x, self.position.y
-  love.graphics.draw(self.sprite, x, y)
+  if not self.collider:isDestroyed() then
+    local x, y = self.collider:getPosition()
+    x = x - tileSize / 2
+    y = y - tileSize / 2
+    love.graphics.draw(self.sprite, x, y)
+  end
 end
 
 return Projectile

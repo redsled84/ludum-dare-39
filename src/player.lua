@@ -68,8 +68,6 @@ function Player:update(dt)
   self:movementWithKeys(dt)
   self.position = colliderUtils.getPosition(self.collider)
   self:updateCollider(dt)
-
-  self:handleShoot(dt, Projectiles)
 end
 
 function Player:handleShoot(dt, Projectiles)
@@ -99,7 +97,6 @@ function Player:updateCollider(dt)
   end
   if colliders then
     local crystal = nil
-    local crystalObject = nil
     for i = 1, #colliders do
       if colliders[i].collision_class == 'Crystal' then
         crystal = colliders[i]

@@ -25,8 +25,6 @@ world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
 world:addCollisionClass('Projectile', {ignore={'Player'}})
 
-Projectiles = {}
-
 -- TODO: implement animations
 -- src
 local Cell = require 'src.cell'
@@ -74,6 +72,7 @@ function Game:initialize(firstTime)
   -- This will be a general purpose table for *referencing* entities such as items, player,
   -- enemies, walls. Each entity requires a position vector.
   self.Entities = {Player}
+  self.Projectiles = {}
   self:createColliders(grid, gridWidth, gridHeight)
 
   -- post_shader = PostShader()
@@ -101,14 +100,14 @@ function Game:createColliders(grid, gridWidth, gridHeight)
 end
 
 function Game:update(dt)
-  print(#Projectiles)
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
       if entity.name == 'Player' then
-        entity:update(dt, Projectiles)
+        entity:update(dt)
+        entity:handleShoot(dt, self.Projectiles)
       elseif entity.name == 'Door' or entity.name == 'Crystal' then
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)
@@ -116,12 +115,12 @@ function Game:update(dt)
         entity:update(dt)
       end
     end
-    for i = #Projectiles, 1, -1 do
-      local proj = Projectiles[i]
+    for i = #self.Projectiles, 1, -1 do
+      local proj = self.Projectiles[i]
       if proj.collider:isDestroyed() then
-        table.remove(Projectiles, i)
+        table.remove(self.Projectiles, i)
       else
-        proj:update(dt)
+        proj:update(dt, self.Projectiles)
       end
     end
 
@@ -171,6 +170,7 @@ function Game:draw(bool)
       Map:drawLayer('wall')
 
       self:drawEntities(true)
+      self:drawProjectiles(true)
 
       Player:draw()
     -- end)
@@ -198,13 +198,15 @@ function Game:drawEntities(bool)
       love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
     end
   end
-  for i = 1, #Projectiles do
-    local proj = Projectiles[i]
+end
+
+function Game:drawProjectiles(bool)
+  for i = #self.Projectiles, 1, -1 do
+    local proj = self.Projectiles[i]
     love.graphics.setColor(255,255,255)
     proj:draw()
   end
 end
-
 
 function Game:drawDebug(bool)
   if not bool and self.state ~= 'game_over' then return end
@@ -228,12 +230,6 @@ function Game:keypressed(key)
   end
   if key == 'q' then
     love.event.quit()
-  end
-  if key == 'p' then
-    local colliders = world:queryCircleArea(100, 100, 100)
-    for _, collider in ipairs(colliders) do
-      collider:applyLinearImpulse(1000, 1000)
-    end
   end
 
   Player:keypressed(key)
