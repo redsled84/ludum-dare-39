@@ -89,14 +89,12 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 2 then
       self.Entities[#self.Entities+1] = Crystal:new(vector(px, py), 5)
     end
-    if val == 4 then
-      self.Entities[#self.Entities+1] = Terminal:new(vector(px, py))
-    end
-  end)
-  Map:loopGrid(function(x, y, val)
-    local px, py = x * tileSize, y * tileSize
     if val == 3 then
       self.Entities[#self.Entities+1] = Door:new(vector(px, py))
+    end
+    if val == 4 then
+      local terminal = Terminal:new(vector(px, py))
+      self.Entities[#self.Entities+1] = terminal
     end
   end)
 end
@@ -109,13 +107,11 @@ function Game:update(dt)
       local entity = self.Entities[i]
       if entity.name == 'Player' then
         entity:update(dt, self.Projectiles)
-      end
-      if entity.name ~= 'Door' then
-        entity:update(dt)
-      elseif entity.name ~= 'Player' then
-        -- for now this gets all the terminals, but we can change it to lists of specific terminals
+      elseif entity.name == 'Door' or entity.name == 'Crystal' then
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)
+      else
+        entity:update(dt)
       end
     end
     for i = #self.Projectiles, 1, -1 do
@@ -145,6 +141,7 @@ function Game:getEntities(name)
   local temp = {}
   for i = 1, #self.Entities do
     if self.Entities[i].name == name then
+      -- print(self.Entities[i].collider.collision_class)
       table.insert(temp, self.Entities[i])
     end
   end

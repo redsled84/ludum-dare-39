@@ -9,6 +9,7 @@ local colliderUtils = require 'utils.colliderUtils'
 local Crystal = class('Crystal')
 
 function Crystal:initialize(position, strength)
+  self.name = 'Crystal'
   self.position = position
   self.strength = strength
   self.sprite = love.graphics.newImage('sprites/crystal.png')
@@ -24,24 +25,23 @@ function Crystal:initialize(position, strength)
   end)
 end
 
-function Crystal:update(dt)
+function Crystal:update(dt, terminals)
   self.position = colliderUtils.getPosition(self.collider)
   if not self.pickedUp then
     local x, y = self.collider:getPosition()
-    colliders = world:queryRectangleArea(x, y, 15, 15, {'Terminal'})
-    if colliders then
-      local terminal
-      for i = 1, #colliders do
-        local collider = colliders[i]
-        local colliderObject = collider:getObject()
-        if colliderObject then
-          if not colliderObject.hasCrystal then
-            terminal = collider
-          end
+    
+    if terminals then
+      local term
+      for i = 1, #terminals do
+        local terminal = terminals[i]
+        local tx, ty = terminal.collider:getPosition()
+        local dist = math.sqrt((tx - x)^2 + (ty-y)^2)
+        if dist < 12 and not terminal.hasKey then
+          term = terminal
         end
-      end    
-      if terminal then
-        local x, y = terminal:getPosition()
+      end
+      if term then
+        local x, y = term.collider:getPosition()
         self.collider:setPosition(x, y)
       end
     end
