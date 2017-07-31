@@ -25,6 +25,8 @@ world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
 world:addCollisionClass('Projectile', {ignore={'Player'}})
 
+Projectiles = {}
+
 -- TODO: implement animations
 -- src
 local Cell = require 'src.cell'
@@ -67,7 +69,6 @@ function Game:initialize(firstTime)
   Player:initialize(vector(2*tileSize, 6*tileSize))
 
   self.Cells = {}
-  self.Projectiles = {}
   self.state = 'game_start'
 
   -- This will be a general purpose table for *referencing* entities such as items, player,
@@ -100,13 +101,14 @@ function Game:createColliders(grid, gridWidth, gridHeight)
 end
 
 function Game:update(dt)
+  print(#Projectiles)
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
     for i = 1, #self.Entities do
       local entity = self.Entities[i]
       if entity.name == 'Player' then
-        entity:update(dt, self.Projectiles)
+        entity:update(dt, Projectiles)
       elseif entity.name == 'Door' or entity.name == 'Crystal' then
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)
@@ -114,10 +116,10 @@ function Game:update(dt)
         entity:update(dt)
       end
     end
-    for i = #self.Projectiles, 1, -1 do
-      local proj = self.Projectiles[i]
+    for i = #Projectiles, 1, -1 do
+      local proj = Projectiles[i]
       if proj.collider:isDestroyed() then
-        table.remove(self.Projectiles, i)
+        table.remove(Projectiles, i)
       else
         proj:update(dt)
       end
@@ -196,8 +198,8 @@ function Game:drawEntities(bool)
       love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
     end
   end
-  for i = 1, #self.Projectiles do
-    local proj = self.Projectiles[i]
+  for i = 1, #Projectiles do
+    local proj = Projectiles[i]
     love.graphics.setColor(255,255,255)
     proj:draw()
   end

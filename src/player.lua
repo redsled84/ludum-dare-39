@@ -64,7 +64,7 @@ function Player:hasFinishedMap()
   return self.finishedMap
 end
 
-function Player:update(dt, Projectiles)
+function Player:update(dt)
   self:movementWithKeys(dt)
   self.position = colliderUtils.getPosition(self.collider)
   self:updateCollider(dt)
@@ -79,7 +79,7 @@ function Player:handleShoot(dt, Projectiles)
   end
   -- fire projectile
   if KEYS['space'] and Projectiles then
-    Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir])
+    Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir], {self.collider})
     self.shootTimer = SHOOT_COOLDOWN
   end
 end

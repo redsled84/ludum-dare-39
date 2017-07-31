@@ -8,7 +8,8 @@ local Projectile = class('Projectile')
 
 local SPEED = 120
 
-function Projectile:initialize(position, velocity)
+function Projectile:initialize(position, velocity, ignoredColliders)
+  self.ignored = ignoredColliders
   self.position = position
   self.velocity = velocity
   self.sprite = love.graphics.newImage('sprites/bullet.png')
@@ -23,11 +24,20 @@ end
 
 function Projectile:update(dt)
   if self.collider:enter('Crystal') then
-    print('crystal!')
+    -- get collision position
+    local collision_data = self.collider:getEnterCollisionData('Crystal')
+    if self:shouldIgnore(collision_data.collider) then break end
+    local x, y = collision_data.collider:getPosition()
+    -- create new projectiles at the collision position
+    local pos = vector(x, y)
+    local v1 = vector(self.velocity.y, self.velocity.x)
+    local v2 = -v1
+    Projectiles[#Projectiles+1] = Projectile:new(pos, v1, {collision_data.collider})
+    Projectiles[#Projectiles+1] = Projectile:new(pos, v2, {collision_data.collider})
+    -- destroy collider
     self.collider:destroy()
   end
   if self.collider:enter('Cell') then
-    print('crystal!')
     self.collider:destroy()
   end
   if not self.collider:isDestroyed() then
