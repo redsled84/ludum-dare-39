@@ -62,6 +62,14 @@ function Projectile:update(dt, Projectiles)
   if self.collider:enter('Cell') then
     self.collider:destroy()
   end
+  if self.collider:enter('Door') then
+    local collision_data = self.collider:getEnterCollisionData('Door')
+    local door = collision_data.collider:getObject()
+    if not door.open then
+      self.collider:destroy()
+    end
+  end
+
 end
 
 function Projectile:draw()
