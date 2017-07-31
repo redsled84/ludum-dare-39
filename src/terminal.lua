@@ -1,3 +1,4 @@
+local audioUtils = require 'utils.audioUtils'
 local colliderUtils = require 'utils.colliderUtils'
 
 local class = require 'libs.middleclass'
@@ -17,6 +18,12 @@ function Terminal:initialize(position)
   self.collider:setType('static')
   self.collider:setCollisionClass('Terminal')
   self.sprite = love.graphics.newImage('sprites/terminal.png')
+  self.sounds = {
+    placed = {
+      source = love.audio.newSource('audio/crystal_placed.wav', 'static'),
+      once = false
+    }
+  }
   self.hasCrystal = false
   self.collider:setObject(self)
   print(self.position)
@@ -39,11 +46,13 @@ function Terminal:update(dt)
   end
   -- self.position = colliderUtils.getPosition(self.collider)
   if self.collider:enter('Crystal') then
+    audioUtils.play(self.sounds.placed.source, self.sounds.placed.once)
     self.hasCrystal = true
   end
   if self.collider:exit('Crystal') then
     self.hasCrystal = false
   end
+  self.sounds.placed.once = self.hasCrystal
 end
 
 function Terminal:draw()

@@ -1,3 +1,4 @@
+local audioUtils = require 'utils.audioUtils'
 local colliderUtils = require 'utils.colliderUtils'
 
 local class = require 'libs.middleclass'
@@ -14,6 +15,16 @@ function Door:initialize(position, open)
   self.sprites = {
     open = love.graphics.newImage('sprites/door_open.png'),
     close = love.graphics.newImage('sprites/door_closed.png'),
+  }
+  self.sounds = {
+    open = {
+      source = love.audio.newSource('audio/door_open.wav', 'static'),
+      counter = 0
+    },
+    close = {
+      source = love.audio.newSource('audio/door_close.wav', 'static'),
+      counter = 0
+    }
   }
   self.open = open or false
   self.terminals = {}
@@ -36,8 +47,10 @@ function Door:update(dt)
       end
     end
     if count >= #terminals then
+      audioUtils.play(self.sounds.open.source, self.open)
       self.open = true
     else
+      audioUtils.play(self.sounds.close.source, not self.open)
       self.open = false
     end
   end

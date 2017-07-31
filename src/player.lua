@@ -1,4 +1,5 @@
 -- utils
+local audioUtils = require 'utils.audioUtils'
 local colliderUtils = require 'utils.colliderUtils'
 local vectorUtils = require 'utils.vectorUtils'
 
@@ -49,6 +50,16 @@ function Player:initialize(spawnVector)
     left = love.graphics.newImage('sprites/player_left.png'),
     right = love.graphics.newImage('sprites/player_right.png'),
   }
+  self.sounds = {
+    pickup = {
+      source = love.audio.newSource('audio/crystal_pickup.wav', 'static'),
+      once = false,
+    },
+    shoot = {
+      source = love.audio.newSource('audio/shoot.wav', 'static'),
+      once = false,
+    }
+  }
   self.finishedMap = false
   self.velocity = zeroVector
   self.speed = 100
@@ -86,6 +97,7 @@ function Player:handleShoot(dt, Projectiles)
       {}
     )
     self.shootTimer = SHOOT_COOLDOWN
+    audioUtils.play(self.sounds.shoot.source, not KEYS['space'])
   end
 end
 
@@ -111,12 +123,13 @@ function Player:updateCollider(dt)
       crystal:setLinearVelocity(vx * 10, vy * 10)
       local obj = crystal:getObject()
       obj.pickedUp = true
-      self.hasCrystal = true
+      obj.placed = false
+      audioUtils.play(self.sounds.pickup.source, self.sounds.pickup.once)
     else
-      self.hasCrystal = false
       self.actionKey = false
     end
   end
+  self.sounds.pickup.once = self.actionKey
 end
 
 function Player:movementWithKeys()
