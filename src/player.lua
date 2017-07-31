@@ -78,7 +78,7 @@ function Player:initialize(spawnVector)
   self.psystem:setSpread(.75)
   self.psystem:setSpin(math.pi/6, math.pi)
   self.psystem:setSpinVariation(.8)
-  self.psystem:setColors(210, 210, 215, 240, 75, 75, 80, 0)
+  self.psystem:setColors(215, 210, 210, 240, 80, 75, 75, 0)
   self.psystem:setLinearDamping(-.8, -.1)
 end
 
@@ -212,13 +212,17 @@ end
 function Player:drawParticles()
   local scale = .158
   if self.dir == 'right' then
-    love.graphics.draw(self.psystem, self.position.x + 6, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 5, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 5, self.position.y + tileSize - 6, 0, scale, scale)
   elseif self.dir == 'left' then
     love.graphics.draw(self.psystem, self.position.x + tileSize-5, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + tileSize-5, self.position.y + tileSize - 6, 0, scale, scale)
   elseif self.dir == 'up' then
-    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + tileSize - 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 6, self.position.y + tileSize - 2, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + tileSize - 2, 0, scale, scale)
   elseif self.dir == 'down' then
-    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 6, self.position.y + 3, 0, scale, scale)
+    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + 3, 0, scale, scale)
   end
 end
 
