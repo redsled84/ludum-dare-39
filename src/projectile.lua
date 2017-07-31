@@ -12,7 +12,7 @@ function Projectile:initialize(position, velocity, ignoredColliders)
   self.ignored = ignoredColliders
   self.position = position
   self.velocity = velocity
-  self.sprite = love.graphics.newImage('sprites/bullet.png')
+  self.sprite = love.graphics.newImage('sprites/projectile.png')
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 3.5, tileSize / 3.5)
   self.collider:setCollisionClass('Projectile')
   self.collider:setLinearVelocity(SPEED * velocity.x, SPEED * velocity.y)

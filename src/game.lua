@@ -101,7 +101,6 @@ function Game:createColliders(grid, gridWidth, gridHeight)
 end
 
 function Game:update(dt)
-  print(#Projectiles)
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
