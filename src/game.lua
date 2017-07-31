@@ -87,7 +87,7 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     local px, py = x * tileSize, y * tileSize
     if val == 1 then
       self.Cells[#self.Cells+1] = Cell:new(vector(px, py))
-      self.LightBodies[#self.LightBodies+1] = lightWorld:newRectangle(px+tileSize/2, py+tileSize/2, tileSize, tileSize) 
+      self.LightBodies[#self.LightBodies+1] = lightWorld:newRectangle(px+tileSize/2, py+tileSize/2, tileSize, tileSize)
     end
     if val == 3 then
       self.Entities[#self.Entities+1] = Door:new(vector(px, py))
@@ -103,7 +103,7 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
     if val == 2 then
-      local crystal = Crystal:new(vector(px, py), 5)
+      local crystal = Crystal:new(vector(px+tileSize/2, py+tileSize/2), 5)
       self.Entities[#self.Entities+1] = crystal
       local greyscale = math.random(75, 235)
       local light = lightWorld:newLight(px, py, greyscale, greyscale, greyscale, lightRange)
