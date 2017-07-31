@@ -19,11 +19,6 @@ function Projectile:initialize(position, velocity)
 end
 
 function Projectile:update(dt)
-  print 'updating projectile'
-  if self.collider:enter('Crystal') then
-    print 'crystal!'
-  end
-
   local x, y = self.collider:getPosition()
   self.position.x = x - tileSize / 2
   self.position.y = y - tileSize / 2

@@ -78,7 +78,7 @@ function Player:handleShoot(dt, Projectiles)
     return
   end
   -- fire projectile
-  if KEYS['space'] then
+  if KEYS['space'] and Projectiles then
     Projectiles[#Projectiles+1] = Projectile:new(vector(self.position:unpack()), DIR2VEC[self.dir])
     self.shootTimer = SHOOT_COOLDOWN
   end
@@ -113,7 +113,6 @@ function Player:updateCollider(dt)
       self.actionKey = false
     end
   end
-  print(self.hasCrystal)
 end
 
 function Player:movementWithKeys()
