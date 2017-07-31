@@ -36,6 +36,7 @@ local HUD = require 'src.hud'
 local Map = require 'src.map'
 local Player = require 'src.player'
 local Terminal = require 'src.terminal'
+local Levels = require 'src.levels'
 
 local Game = class('Game')
 
@@ -51,22 +52,11 @@ function Game:initialize(firstTime)
   -- lightPlayer = lightWorld:newLight(0, 0, 200, 150, 100, 235)
   -- lightObjects = {}
 
-  local grid = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1, 4, 0, 0, 0, 1},
-    {1, 0, 0, 0, 1, 0, 0, 4, 0, 1},
-    {1, 0, 0, 0, 3, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 0, 0, 0, 2, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 0, 1, 0, 0, 1},
-    {1, 0, 2, 0, 0, 0, 1, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-  }
+  local grid = Levels
   local gridHeight = #grid
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
-  Player:initialize(vector(2*tileSize, 6*tileSize))
+  Player:initialize(vector(2*tileSize, 2*tileSize))
 
   self.Cells = {}
   self.state = 'game_start'
