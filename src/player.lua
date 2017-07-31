@@ -15,7 +15,7 @@ local KEYS = {
   a = false,
   space = false,
 }
-local MAX_PARTICLES = 16
+local MAX_PARTICLES = 28
 
 -- libs
 local class = require 'libs.middleclass'
@@ -73,12 +73,12 @@ function Player:initialize(spawnVector)
   self.collider:setObject(self)
   self.psystem = love.graphics.newParticleSystem(self.sprites.particle, MAX_PARTICLES)
   -- between 0.5 and 1.0 seconds
-  self.psystem:setParticleLifetime(0.25, .5)
+  self.psystem:setParticleLifetime(0.25, .65)
   self.psystem:setSizeVariation(1)
-  self.psystem:setSpread(.5)
+  self.psystem:setSpread(.75)
   self.psystem:setSpin(math.pi/6, math.pi)
   self.psystem:setSpinVariation(.8)
-  self.psystem:setColors(210, 210, 210, 240, 75, 75, 75, 0)
+  self.psystem:setColors(210, 210, 215, 240, 75, 75, 80, 0)
   self.psystem:setLinearDamping(-.8, -.1)
 end
 
@@ -210,14 +210,15 @@ function Player:draw()
 end
 
 function Player:drawParticles()
+  local scale = .158
   if self.dir == 'right' then
-    love.graphics.draw(self.psystem, self.position.x + 7, self.position.y + tileSize - 3, 0, .25, .25)
+    love.graphics.draw(self.psystem, self.position.x + 7, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'left' then
-    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + tileSize - 3, 0, .25, .25)
+    love.graphics.draw(self.psystem, self.position.x + 11, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'up' then
-    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + tileSize - 3, 0, .25, .25)
+    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + tileSize - 3, 0, scale, scale)
   elseif self.dir == 'down' then
-    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + 3, 0, .25, .25)
+    love.graphics.draw(self.psystem, self.position.x + tileSize/2, self.position.y + 3, 0, scale, scale)
   end
 end
 
