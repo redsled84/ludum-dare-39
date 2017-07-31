@@ -60,9 +60,9 @@ function Door:draw()
   local x, y = self.position.x, self.position.y
   love.graphics.setColor(255,255,255)
   if self.open then
-    love.graphics.draw(self.sprites.open, x, y)
+    love.graphics.draw(self.sprites.open, x, y + 3)
   else
-    love.graphics.draw(self.sprites.close, x, y)
+    love.graphics.draw(self.sprites.close, x, y + 3)
   end
 end
 

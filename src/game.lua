@@ -41,16 +41,30 @@ local Gap = require 'src.gap'
 local Game = class('Game')
 
 function Game:initialize(firstTime)
-  love.graphics.setDefaultFilter('nearest', 'nearest')
-  -- lightWorld = LightWorld({
-  --   ambient = {45, 45, 45},
-  --   refractionStrength = 1.0,
-  --   reflectionVisibility = 0.95,
-  --   shadowBlur = 0.0
-  -- })
+  main_theme = love.audio.newSource('audio/main_theme.wav', 'stream')
+  main_theme:setLooping(true)
+  main_theme:setVolume(.3)
 
-  -- lightPlayer = lightWorld:newLight(0, 0, 200, 150, 100, 235)
-  -- lightObjects = {}
+  love.graphics.setDefaultFilter('nearest', 'nearest')
+  lightRange = 100
+  lightSmooth = 1.0
+
+  lightWorld = LightWorld({
+    ambient = {15,15,15},
+    refractionStrength = 16.0,
+    reflectionVisibility = 1.0,
+    shadowBlur = 2.0,
+    w = love.graphics.getWidth() / 4,
+    h = love.graphics.getHeight() / 4
+  })
+
+  lightPlayer = lightWorld:newLight(0, 0, 255, 191, 127, lightRange)
+  lightPlayer:setGlowStrength(0.2)
+  lightPlayer:setSmooth(lightSmooth)
+  lightPlayer.z = 1.5
+
+  self.Lights = {}
+  self.LightBodies = {}
 
   local grid = Levels
   local gridHeight = #grid
@@ -78,16 +92,22 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     local px, py = x * tileSize, y * tileSize
     if val == 1 then
       self.Cells[#self.Cells+1] = Cell:new(vector(px, py))
-    end
-    if val == 2 then
-      self.Entities[#self.Entities+1] = Crystal:new(vector(px, py), 5)
+      self.LightBodies[#self.LightBodies+1] = lightWorld:newRectangle(px+tileSize/2, py+tileSize/2, tileSize, tileSize) 
     end
     if val == 3 then
       self.Entities[#self.Entities+1] = Door:new(vector(px, py))
     end
     if val == 4 then
-      local terminal = Terminal:new(vector(px, py))
-      self.Entities[#self.Entities+1] = terminal
+      self.Entities[#self.Entities+1] = Terminal:new(vector(px, py))
+    end
+    -- In this order so Crystals are drawn over Doors and Terminals
+    if val == 2 then
+      local crystal = Crystal:new(vector(px, py), 5)
+      self.Entities[#self.Entities+1] = crystal
+      local r = math.random(0, 255)
+      local g = math.random(0, 255)
+      local b = math.random(0, 255)
+      self.Lights[#self.Lights+1] = { light=lightWorld:newLight(px, py, r, g, b, lightRange), crystal=crystal }
     end
     if val == 5 then
       self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
@@ -118,7 +138,9 @@ function Game:linkTerminalsAndDoors()
   end
 end
 
+local thing = 0
 function Game:update(dt)
+  main_theme:play()
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
@@ -147,10 +169,14 @@ function Game:update(dt)
     cam:lookAt(camX, camY)
     cam:zoomTo(4, 4)
 
-    -- lightPlayer:setPosition(camX + tileSize / 2, camY + tileSize / 2)
-    -- local lx, ly = -cam.x, -cam.y
-    -- lightWorld:setTranslation(lx, ly, 4)
-    -- lightWorld:update(dt)
+    self:updateLights()
+
+    local lx, ly = -Player.position.x * 4, -Player.position.y * 4
+    lightWorld:setTranslation(-64 + lx + love.graphics.getWidth() / 2 + tileSize * 4 / 2,
+      -64 + ly + love.graphics.getHeight() / 2 + tileSize * 4 / 2, 4)
+    thing = thing + dt * 10
+    -- lightWorld:setTranslation(-64 + lx, -64 + ly, 4)
+    lightWorld:update(dt)
   end
   if self.state == 'level_change' then
     self:initialize(false)
@@ -177,6 +203,14 @@ function Game:findEntityByVector(entities, v)
   end
 end
 
+function Game:updateLights()
+  for i = 1, #self.Lights do
+    local light = self.Lights[i]
+    print(light.light)
+    light.light:setPosition(light.crystal.position.x+tileSize/2, light.crystal.position.y+tileSize/2)
+  end
+end
+
 function Game:print()
   -- print(Player.laserActive)
 end
@@ -192,7 +226,8 @@ function Game:draw(bool)
 
   if self.state == 'game_start' then
     cam:attach()
-    -- lightWorld:draw(function()
+
+    lightWorld:draw(function()
       Map:drawLayer('floor')
       Map:drawLayer('stair')
       Map:drawLayer('wall')
@@ -201,12 +236,19 @@ function Game:draw(bool)
       self:drawProjectiles(true)
 
       Player:draw()
-    -- end)
+    end)
 
     cam:detach()
     -- love.graphics.setCanvas()
     -- post_shader:drawWith(render_buffer)
     HUD:draw(Player)
+    love.graphics.setColor(255,255,255)
+    local w, h = love.graphics.getWidth()/2, love.graphics.getHeight()/2
+    love.graphics.rectangle('line', 0, 0, 64, 64)
+    love.graphics.rectangle('line', 0, 0, w, h)
+    love.graphics.rectangle('line', 0, h, w, h)
+    love.graphics.rectangle('line', w, 0, w, h)
+    love.graphics.rectangle('line', w, h, w, h)
   elseif self.state == 'game_over' then
     -- TODO: change game over screen with player dying animation and restarting game
     love.graphics.setColor(255,0,0)

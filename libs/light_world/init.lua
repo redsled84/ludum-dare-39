@@ -61,24 +61,25 @@ local function new(options)
   for k, v in pairs(options) do obj[k] = v end
 
   local world = setmetatable(obj, light_world)
-  world:refreshScreenSize()
+  world:refreshScreenSize(options.w, options.h)
 
   return world
 end
 
 function light_world:refreshScreenSize(w, h)
-  w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
+  w1, h1 = w or love.graphics.getWidth(), h or love.graphics.getHeight()
 
-  self.w, self.h        = w, h
-	self.render_buffer    = love.graphics.newCanvas(w, h)
-	self.shadow_buffer    = love.graphics.newCanvas(w, h)
-	self.normalMap        = love.graphics.newCanvas(w, h)
-	self.shadowMap        = love.graphics.newCanvas(w, h)
-	self.glowMap          = love.graphics.newCanvas(w, h)
-	self.refractionMap    = love.graphics.newCanvas(w, h)
-	self.reflectionMap    = love.graphics.newCanvas(w, h)
+  local l, t = love.graphics.getWidth(), love.graphics.getHeight()
+  self.w, self.h        = l, t
+	self.render_buffer    = love.graphics.newCanvas(l, t)
+	self.shadow_buffer    = love.graphics.newCanvas(l, t)
+	self.normalMap        = love.graphics.newCanvas(l, t)
+	self.shadowMap        = love.graphics.newCanvas(l, t)
+	self.glowMap          = love.graphics.newCanvas(l, t)
+	self.refractionMap    = love.graphics.newCanvas(l, t)
+	self.reflectionMap    = love.graphics.newCanvas(l, t)
 
-  self.post_shader:refreshScreenSize(w, h)
+  self.post_shader:refreshScreenSize(l, t)
 end
 
 function light_world:update(dt)
@@ -165,7 +166,7 @@ function light_world:drawShadows(l,t,w,h,s)
         shader = self.shadowShader,
         stencil = function()
           local angle = light.direction - (light.angle / 2.0)
-          love.graphics.arc("fill", (light.x + l/s) * s, (light.y + t/s) * s, light.range, angle, angle + light.angle)
+          love.graphics.arc("fill", (light.x + l/s) * s, (light.y + t/s) * s, (light.range*4), angle, angle + light.angle)
         end
       })
     end
@@ -175,7 +176,7 @@ function light_world:drawShadows(l,t,w,h,s)
   util.drawto(self.shadow_buffer, l, t, s, function()
     love.graphics.setBlendMode("add")
     love.graphics.setColor({self.ambient[1], self.ambient[2], self.ambient[3]})
-    love.graphics.rectangle("fill", -l/s, -t/s, w/s,h/s)
+    love.graphics.rectangle("fill",-l/s,-t/s, w/s,h/s)
   end)
 
   self.post_shader:drawBlur(self.shadow_buffer, {self.shadowBlur})
