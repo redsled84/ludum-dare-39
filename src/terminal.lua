@@ -5,7 +5,7 @@ local class = require 'libs.middleclass'
 
 local Terminal = class('Terminal')
 
-local TEMP_ON_DURATION = 2.0
+local TEMP_ON_DURATION = 0.5
 
 function Terminal:initialize(position)
   self.name = 'Terminal'
