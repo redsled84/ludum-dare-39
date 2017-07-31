@@ -4,12 +4,15 @@ local class = require 'libs.middleclass'
 local vector = require 'libs.vector'
 local inspect = require 'libs.inspect'
 
+local Timer = require 'src.timer'
+
 local Projectile = class('Projectile')
 
 local SPEED = 120
 
 function Projectile:initialize(position, velocity, ignoredColliders)
   self.ignored = ignoredColliders
+  self.timers = {}
   self.position = position
   self.velocity = velocity
   self.sprite = love.graphics.newImage('sprites/projectile.png')
@@ -46,6 +49,15 @@ function Projectile:update(dt, Projectiles)
       -- destroy collider
       self.collider:destroy()
     end
+  end
+  if self.collider:enter('Terminal') then
+    print('terminal')
+    local collision_data = self.collider:getEnterCollisionData('Terminal')
+    local term = collision_data.collider:getObject()
+    if not term.hasCrystal then
+      term:turnOnTemp()
+    end
+    self.collider:destroy()
   end
   if self.collider:enter('Cell') then
     self.collider:destroy()

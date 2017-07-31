@@ -104,6 +104,7 @@ function Game:linkTerminalsAndDoors()
     for i = 1, #self.Links do
       local link = self.Links[i]
       if door.position.x == link.door.x and door.position.y == link.door.y then
+        print 'found door'
         terminalVectors = link.terminals
         break
       end
@@ -125,7 +126,7 @@ function Game:update(dt)
       local entity = self.Entities[i]
       if entity.name == 'Player' then
         entity:update(dt)
-        entity:handleShoot(dt, self.Projectiles)        
+        entity:handleShoot(dt, self.Projectiles)
       elseif entity.name == 'Crystal' then
         local terminals = self:getEntities('Terminal')
         entity:update(dt, terminals)

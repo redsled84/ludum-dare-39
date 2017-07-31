@@ -31,7 +31,7 @@ function Door:update(dt)
     local count = 0
     for i = 1, #terminals do
       local terminal = terminals[i]
-      if terminal.hasCrystal then
+      if terminal:isOn() then
         count = count + 1
       end
     end

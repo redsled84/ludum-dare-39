@@ -4,8 +4,12 @@ local class = require 'libs.middleclass'
 
 local Terminal = class('Terminal')
 
+local TEMP_ON_DURATION = 2.0
+
 function Terminal:initialize(position)
   self.name = 'Terminal'
+  self.onTimer = 0.0
+  self.isTempOn = false
   self.position = position
   local shave = 5
   self.collider = world:newRectangleCollider(position.x + shave / 2, position.y + shave / 2,
@@ -18,7 +22,21 @@ function Terminal:initialize(position)
   print(self.position)
 end
 
+function Terminal:turnOnTemp()
+  self.onTimer = TEMP_ON_DURATION
+end
+
+function Terminal:isOn()
+  return self.hasCrystal or self.isTempOn
+end
+
 function Terminal:update(dt)
+  if self.onTimer > 0.0 then
+    self.isTempOn = true
+    self.onTimer = self.onTimer - dt
+  else
+    self.isTempOn = false
+  end
   -- self.position = colliderUtils.getPosition(self.collider)
   if self.collider:enter('Crystal') then
     self.hasCrystal = true
