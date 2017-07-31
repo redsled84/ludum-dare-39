@@ -291,6 +291,8 @@ function Player:action()
     else
       -- put the crystal in the terminal
       local terminal_collider = colliders[1]
+      local terminal = terminal_collider:getObject()
+      if terminal.hasCrystal then return end
       self.item.collider:setPosition(terminal_collider:getPosition())
       self.item = nil
     end
