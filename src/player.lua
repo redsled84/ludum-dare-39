@@ -6,7 +6,7 @@ local vectorUtils = require 'utils.vectorUtils'
 local powerDecrement = 0.1
 local laserCost = 0.5
 local zeroVector = vectorUtils.getZeroVector()
-local SHOOT_COOLDOWN = 1.0
+local SHOOT_COOLDOWN = 0.5
 local KEYS = {
   w = false,
   s = false,
@@ -51,7 +51,7 @@ function Player:initialize(spawnVector)
   }
   self.finishedMap = false
   self.velocity = zeroVector
-  self.speed = 100
+  self.speed = 60
   self.actionKey = false
   self.hasCrystal = false
   self.collider = world:newRectangleCollider(self.position.x, self.position.y, tileSize / 2.2, tileSize / 2.2)
