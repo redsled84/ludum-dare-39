@@ -8,6 +8,8 @@ states = {
   level_change = 'level_change'
 }
 
+local gameUtils = require 'utils.gameUtils'
+
 -- libs
 local Cam = require 'libs.camera'
 local cam = Cam(0, 0)
@@ -41,6 +43,10 @@ local Gap = require 'src.gap'
 local Game = class('Game')
 
 function Game:initialize(firstTime)
+  gameUtils.initialize()
+
+  GAME_POWER = 10
+
   main_theme = love.audio.newSource('audio/main_theme.wav', 'stream')
   main_theme:setLooping(true)
   main_theme:setVolume(.3)
@@ -105,7 +111,7 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 2 then
       local crystal = Crystal:new(vector(px+tileSize/3, py+tileSize/3), 5)
       self.Entities[#self.Entities+1] = crystal
-      local greyscale = math.random(75, 235)
+      local greyscale = math.random(100, 245)
       local light = lightWorld:newLight(px, py, greyscale, greyscale, greyscale, lightRange)
       light.z = 9
 
@@ -169,6 +175,9 @@ function Game:update(dt)
     cam:zoomTo(4, 4)
 
     self:updateLights()
+
+    gameUtils.removePower(dt)
+    print(gameUtils.count)
 
     local lx, ly = -Player.position.x * 4, -Player.position.y * 4
     lightWorld:setTranslation(-64 + lx + love.graphics.getWidth() / 2 + tileSize * 4 / 2,

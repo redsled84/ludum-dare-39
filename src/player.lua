@@ -78,7 +78,7 @@ function Player:initialize(spawnVector)
   self.psystem:setSpread(.75)
   self.psystem:setSpin(math.pi/6, math.pi)
   self.psystem:setSpinVariation(.8)
-  self.psystem:setColors(215, 210, 210, 240, 80, 75, 75, 0)
+  self.psystem:setColors(205, 200, 200, 240, 65, 55, 55, 0)
   self.psystem:setLinearDamping(-.8, -.1)
 end
 
@@ -210,6 +210,7 @@ function Player:draw()
 end
 
 function Player:drawParticles()
+  love.graphics.setColor(255,255,255)
   local scale = .158
   if self.dir == 'right' then
     love.graphics.draw(self.psystem, self.position.x + 5, self.position.y + tileSize - 3, 0, scale, scale)
@@ -228,7 +229,7 @@ end
 
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(255,255,255)
+  love.graphics.setColor(180,190,230)
   -- draw held item
   if self.hasItem then
     love.graphics.draw(self.sprites['crystal'], x, y - 4)

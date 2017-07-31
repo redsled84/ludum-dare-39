@@ -1,5 +1,6 @@
 local audioUtils = require 'utils.audioUtils'
 local colliderUtils = require 'utils.colliderUtils'
+local gameUtils = require 'utils.gameUtils'
 
 local class = require 'libs.middleclass'
 
@@ -49,6 +50,7 @@ function Door:update(dt)
     if count >= #terminals then
       audioUtils.play(self.sounds.open.source, self.open)
       self.open = true
+      gameUtils.addPower(self)
     else
       audioUtils.play(self.sounds.close.source, not self.open)
       self.open = false
@@ -58,10 +60,11 @@ end
 
 function Door:draw()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(255,255,255)
   if self.open then
+    love.graphics.setColor(150,255,165)
     love.graphics.draw(self.sprites.open, x, y + 3)
   else
+    love.graphics.setColor(255,150,165)
     love.graphics.draw(self.sprites.close, x, y + 3)
   end
 end
