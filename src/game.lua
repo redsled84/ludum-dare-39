@@ -33,23 +33,25 @@ world:addCollisionClass('Projectile', {ignore={'Player'}})
 local Cell = require 'src.cell'
 local Crystal = require 'src.crystal'
 local Door = require 'src.door'
-local HUD = require 'src.hud'
+
 local Map = require 'src.map'
 local Player = require 'src.player'
 local Terminal = require 'src.terminal'
 local Levels = require 'src.levels'
 local Gap = require 'src.gap'
+local Pause = require 'src.pause'
 
 local Game = class('Game')
 
 function Game:initialize(firstTime)
   gameUtils.initialize()
 
-  GAME_POWER = 10
+  -- GAME_POWER = 10
 
   main_theme = love.audio.newSource('audio/main_theme.wav', 'stream')
   main_theme:setLooping(true)
   main_theme:setVolume(.3)
+  main_theme:play()
 
   love.graphics.setDefaultFilter('nearest', 'nearest')
   lightRange = 150
@@ -145,7 +147,6 @@ end
 
 local thing = 0
 function Game:update(dt)
-  main_theme:play()
   Game:checkState()
   if self.state ~= 'game_over' then
     world:update(dt)
@@ -177,7 +178,6 @@ function Game:update(dt)
     self:updateLights()
 
     gameUtils.removePower(dt)
-    print(gameUtils.count)
 
     local lx, ly = -Player.position.x * 4, -Player.position.y * 4
     lightWorld:setTranslation(-64 + lx + love.graphics.getWidth() / 2 + tileSize * 4 / 2,
@@ -185,9 +185,10 @@ function Game:update(dt)
     thing = thing + dt * 10
     -- lightWorld:setTranslation(-64 + lx, -64 + ly, 4)
     lightWorld:update(dt)
-  end
-  if self.state == 'level_change' then
-    self:initialize(false)
+
+    if Pause.isPaused then
+      Pause.update()
+    end
   end
 end
 
@@ -247,21 +248,19 @@ function Game:draw(bool)
     end)
 
     cam:detach()
+    if Pause.isPaused then
+      Pause.draw()
+    end
     -- love.graphics.setCanvas()
     -- post_shader:drawWith(render_buffer)
-    HUD:draw(Player)
-    love.graphics.setColor(255,255,255)
-    local w, h = love.graphics.getWidth()/2, love.graphics.getHeight()/2
+    -- HUD:draw(Player)
+    -- love.graphics.setColor(255,255,255)
+    -- local w, h = love.graphics.getWidth()/2, love.graphics.getHeight()/2
     -- love.graphics.rectangle('line', 0, 0, 64, 64)
     -- love.graphics.rectangle('line', 0, 0, w, h)
     -- love.graphics.rectangle('line', 0, h, w, h)
     -- love.graphics.rectangle('line', w, 0, w, h)
     -- love.graphics.rectangle('line', w, h, w, h)
-  elseif self.state == 'game_over' then
-    -- TODO: change game over screen with player dying animation and restarting game
-    love.graphics.setColor(255,0,0)
-    love.graphics.print('You Ran Out Of Power!',
-      love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
   end
   self:drawDebug(false)
 end
@@ -304,10 +303,7 @@ end
 
 function Game:keypressed(key)
   if key == 'escape' then
-    love.event.quit('restart')
-  end
-  if key == 'q' then
-    love.event.quit()
+    Pause.isPaused = not Pause.isPaused
   end
 
   Player:keypressed(key)
@@ -319,6 +315,7 @@ end
 
 function Game:mousepressed(x, y, button)
   -- replace with checking menu buttons
+  Pause.mousepressed(x, y, button, main_theme)
 end
 
 return Game
