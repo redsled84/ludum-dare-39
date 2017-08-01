@@ -43,7 +43,7 @@ local Pause = require 'src.pause'
 
 local Game = class('Game')
 
-function Game:initialize(firstTime)
+function Game:initialize()
   gameUtils.initialize()
 
   -- GAME_POWER = 10
