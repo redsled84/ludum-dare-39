@@ -259,7 +259,7 @@ function Game:draw(bool)
     -- love.graphics.rectangle('line', w, h, w, h)
   elseif self.state == 'game_over' then
     -- TODO: change game over screen with player dying animation and restarting game
-    love.graphics.setColor(255,0,0)
+    love.graphics.setColor(255,255,255)
     love.graphics.print('You Ran Out Of Power!',
       love.graphics.getWidth() / 2 - 16, love.graphics.getHeight() / 2)
   end
@@ -272,7 +272,7 @@ function Game:drawEntities(bool)
     local entity = self.Entities[i]
     if entity.name ~= 'Player' then
       entity:draw()
-      -- love.graphics.setColor(255,255,255,80)
+      -- love.graphics.setColor(255,255,255)
       -- love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
     end
   end

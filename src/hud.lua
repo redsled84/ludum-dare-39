@@ -20,15 +20,15 @@ function HUD:draw(Player)
   local y = love.graphics.getHeight() - hudHeight - 5
   local paddingX = hudWidth + 2
 
-  love.graphics.setColor(235,235,235)
+  love.graphics.setColor(255,255,255)
   local str = love.graphics.newText(thisFont, 'POWER')
   love.graphics.draw(str, love.graphics.getWidth()/2-str:getWidth()/3, y - fontSize)
 
   local powerShadowHeight = 16
   for i = 1, gameUtils.count do
-    love.graphics.setColor(245,65,65,255)
+    love.graphics.setColor(255,255,255)
     love.graphics.rectangle('fill', x+paddingX*(i-1), y, hudWidth, hudHeight-powerShadowHeight)
-    love.graphics.setColor(150, 30, 30)
+    love.graphics.setColor(255,255,255)
     love.graphics.rectangle('fill', x+paddingX*(i-1), y+hudHeight-powerShadowHeight, hudWidth, powerShadowHeight)
   end
 

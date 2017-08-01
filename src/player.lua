@@ -250,7 +250,7 @@ end
 
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(180,190,230)
+  love.graphics.setColor(255,255,255)
   -- draw held item
   if self.hasItem then
     love.graphics.draw(self.sprites['crystal'], x, y - 4)
@@ -266,7 +266,7 @@ end
 function Player:drawDebug(bool)
   if not bool then return end
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(255,120,120)
+  love.graphics.setColor(255,255,255)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 

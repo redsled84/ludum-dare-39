@@ -99,12 +99,12 @@ function Map:drawLayer(layerString, playerPos)
   self:loopGrid(function(x, y, val)
     local position = vector(x * tileSize, y * tileSize)
     if val ~= 0 then
-      love.graphics.setColor(225, 179, 155)
+      love.graphics.setColor(255,255,255)
       love.graphics.draw(sprites['floor'], position.x, position.y)
     end
     if val == spriteNums[layerString] then
       if val == 0 then
-        love.graphics.setColor(225, 179, 155)
+        love.graphics.setColor(255,255,255)
       else
         love.graphics.setColor(255,255,255)
       end
@@ -145,7 +145,7 @@ function Map:drawDebug(bool)
 end
 
 function Map:drawMapDebug()
-  love.graphics.setColor(35, 120, 255)
+  love.graphics.setColor(255,255,255)
   love.graphics.rectangle('line', tileSize, tileSize,
     self.gridWidth * tileSize, self.gridHeight * tileSize)
 end
@@ -156,12 +156,12 @@ function Map:drawGridDebug(drawType)
       local num = self.Grid[y][x]
       local position = vector(x * tileSize, y * tileSize)
 
-      love.graphics.setColor(255, 255, 255, 45)
+      love.graphics.setColor(255,255,255)
       love.graphics.rectangle(drawType, position.x, position.y, tileSize, tileSize)
-      love.graphics.setColor(255, 255, 60, 120)
+      love.graphics.setColor(255,255,255)
       love.graphics.print(tostring(x), position.x, position.y)
       love.graphics.print(tostring(y), position.x, position.y + 12)
-      love.graphics.setColor(255,0,0,120)
+      love.graphics.setColor(255,255,255)
       love.graphics.print(tostring(num), position.x + 18, position.y)
     end
   end
