@@ -47,6 +47,7 @@ function Game:initialize()
   gameUtils.initialize()
 
   -- GAME_POWER = 10
+  end_screen = love.graphics.newImage('sprites/fin.png')
 
   main_theme = love.audio.newSource('audio/main_theme.wav', 'stream')
   main_theme:setLooping(true)
@@ -73,7 +74,7 @@ function Game:initialize()
   local gridHeight = #grid
   local gridWidth = #grid[1]
   Map:initialize(grid, gridWidth, gridHeight)
-  Player:initialize(vector(2*tileSize, 2*tileSize))
+  Player:initialize(self, vector(2*tileSize, 2*tileSize))
 
   self.Cells = {}
   self.state = 'game_start'
@@ -88,6 +89,8 @@ function Game:initialize()
   -- post_shader = PostShader()
   -- post_shader:toggleEffect("blur", 2.0, 2.0)
   -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
+
+  self.endScreenTimer = 2.0
 end
 
 function Game:createColliders(grid, gridWidth, gridHeight)
@@ -189,6 +192,14 @@ function Game:update(dt)
     if Pause.isPaused then
       Pause.update()
     end
+  else
+    -- show end screen
+    -- mute the sound
+    main_theme:stop()
+    -- fade out
+    if self.endScreenTimer > 0 then
+      self.endScreenTimer = self.endScreenTimer - dt
+    end
   end
 end
 
@@ -231,6 +242,14 @@ end
 
 function Game:draw(bool)
   if not bool then return end
+
+  if self.state == 'game_over' then
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.draw(end_screen)
+    love.graphics.setColor(0, 0, 0, 255 * self.endScreenTimer / 2.0)
+    love.graphics.rectangle('fill', 0, 0, 640, 640)
+    return
+  end
 
   if self.state == 'game_start' then
     cam:attach()

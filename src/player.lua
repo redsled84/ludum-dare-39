@@ -35,7 +35,8 @@ local DIR2VEC = {
 
 local Player = class('Player')
 
-function Player:initialize(spawnVector)
+function Player:initialize(game, spawnVector)
+  self.game = game
   self.name = 'Player'
   self.position = spawnVector
   -- self.tween = Tween:new()
@@ -80,6 +81,8 @@ function Player:initialize(spawnVector)
   self.psystem:setSpinVariation(.8)
   self.psystem:setColors(205, 200, 200, 240, 65, 55, 55, 0)
   self.psystem:setLinearDamping(-.8, -.1)
+
+   self.endScreenTimer = 2.0
 end
 
 function Player:hasFinishedMap()
@@ -95,6 +98,15 @@ function Player:update(dt)
   end
   self:updateParticles()
   self.psystem:update(dt)
+
+  if self.position.y > 32 * tileSize then
+    -- fade to end screen
+    self.endScreenTimer = self.endScreenTimer - dt
+    main_theme:setVolume(0.3 * (self.endScreenTimer / 2.0))
+    if self.endScreenTimer <= 0 then
+      self.game.state = 'game_over'
+    end
+  end
 end
 
 function Player:handleShoot(dt, Projectiles)
@@ -228,6 +240,8 @@ end
 
 function Player:draw()
   self:drawSprites()
+  love.graphics.setColor(0, 0, 0, 255 * (1 - self.endScreenTimer / 2.0))
+  love.graphics.rectangle('fill', 0, 0, 640, 640)
 end
 
 function Player:drawParticles()
