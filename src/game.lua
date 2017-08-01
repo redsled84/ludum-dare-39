@@ -271,7 +271,7 @@ function Game:drawEntities(bool)
     local entity = self.Entities[i]
     if entity.name ~= 'Player' then
       entity:draw()
-      -- love.graphics.setColor(255,255,255,80)
+      -- love.graphics.setColor(255,255,255)
       -- love.graphics.rectangle('line', entity.position.x, entity.position.y, tileSize, tileSize)
     end
   end

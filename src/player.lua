@@ -106,7 +106,7 @@ function Player:handleShoot(dt, Projectiles)
   if KEYS['space'] and Projectiles and self.item ~= nil then
     Projectiles[#Projectiles+1] = Projectile:new(
       vector(
-        self.position.x + tileSize/2,
+        self.position.x + tileSize/2.8,
         self.position.y + tileSize/2
       ),
       DIR2VEC[self.dir],
@@ -250,7 +250,7 @@ end
 
 function Player:drawSprites()
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(180,190,230)
+  love.graphics.setColor(255,255,255)
   -- draw held item
   if self.hasItem then
     love.graphics.draw(self.sprites['crystal'], x, y - 4)
@@ -266,7 +266,7 @@ end
 function Player:drawDebug(bool)
   if not bool then return end
   local x, y = self.position.x, self.position.y
-  love.graphics.setColor(255,120,120)
+  love.graphics.setColor(255,255,255)
   love.graphics.rectangle('line', x, y, tileSize, tileSize)
 end
 

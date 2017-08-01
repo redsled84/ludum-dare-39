@@ -58,10 +58,8 @@ function Crystal:setPower(strength)
 end
 
 function Crystal:draw()
-  love.graphics.setColor(100,200,255, 160)
   local x, y = self.position.x, self.position.y
   love.graphics.draw(self.sprite, x, y)
-  love.graphics.setColor(255,255,255, 255)
 end
 
 return Crystal
