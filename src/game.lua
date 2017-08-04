@@ -123,7 +123,6 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     end
   end)
   Map:loopGrid(function(x, y, val)
-    print(self.crystalPositions)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
     if val == 2 then
@@ -155,7 +154,6 @@ function Game:save()
       self.savedPlayerPosition = vector(x, y)
     end
   end
-  print('crystals found:', #self.crystalPositions)
   self.saveTextTimer = 3.0
 end
 
@@ -193,7 +191,6 @@ function Game:linkTerminalsAndDoors()
     for i = 1, #self.Links do
       local link = self.Links[i]
       if door.position.x == link.door.x and door.position.y == link.door.y then
-        print 'found door'
         terminalVectors = link.terminals
         break
       end

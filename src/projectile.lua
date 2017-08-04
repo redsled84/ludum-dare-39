@@ -28,7 +28,6 @@ end
 function Projectile:shouldIgnore(collider)
   for i = 1, #self.ignored do
     if self.ignored[i] == collider then
-      print 'yatta'
       return true
     end
   end
@@ -51,7 +50,6 @@ function Projectile:update(dt, Projectiles)
     end
   end
   if self.collider:enter('Terminal') then
-    print('terminal')
     local collision_data = self.collider:getEnterCollisionData('Terminal')
     local term = collision_data.collider:getObject()
     if not term.hasCrystal then

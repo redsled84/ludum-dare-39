@@ -26,7 +26,6 @@ function Terminal:initialize(position)
   }
   self.hasCrystal = false
   self.collider:setObject(self)
-  print(self.position)
 end
 
 function Terminal:turnOnTemp()
