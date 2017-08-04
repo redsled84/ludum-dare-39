@@ -26,7 +26,10 @@ world:addCollisionClass('Door')
 world:addCollisionClass('Gap')
 world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
+world:addCollisionClass('Checkpoint')
 world:addCollisionClass('Projectile', {ignore={'Player'}})
+local controlsFont = love.graphics.newFont('fonts/ARCADECLASSIC.TTF', 26)
+controlsFont:setFilter('nearest', 'nearest')
 
 -- TODO: implement animations
 -- src
@@ -40,6 +43,7 @@ local Terminal = require 'src.terminal'
 local Levels = require 'src.levels'
 local Gap = require 'src.gap'
 local Pause = require 'src.pause'
+local Checkpoint = require 'src.checkpoint'
 
 local Game = class('Game')
 
@@ -91,9 +95,17 @@ function Game:initialize()
   -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
 
   self.endScreenTimer = 2.0
+  self.saveTextTimer = 0.0
+
+  self.saveText = love.graphics.newText(controlsFont, "SAVED\npress   ESC   for   menu")
+  self.displaySaveText = false
+
+  self:save()
 end
 
 function Game:createColliders(grid, gridWidth, gridHeight)
+  --Checkpoint:new(vector(2 * tileSize, 7 * tileSize))
+  Checkpoint:new(vector(21 * tileSize, 16 * tileSize))
   Map:loopGrid(function(x, y, val)
     local px, py = x * tileSize, y * tileSize
     if val == 1 then
@@ -111,6 +123,7 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     end
   end)
   Map:loopGrid(function(x, y, val)
+    print(self.crystalPositions)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
     if val == 2 then
@@ -123,6 +136,52 @@ function Game:createColliders(grid, gridWidth, gridHeight)
       self.Lights[#self.Lights+1] = { light=light, crystal=crystal }
     end
   end)
+end
+
+function Game:save()
+  self.crystalPositions = {}
+  self.terminalStates = {}
+  for i = 1, #self.Entities do
+    local e = self.Entities[i]
+    if e.name == 'Crystal' then
+      local x, y = e.collider:getPosition()
+      self.crystalPositions[#self.crystalPositions+1] = vector(x, y)
+    end
+    if e.name == 'Terminal' then
+      self.terminalStates[#self.terminalStates+1] = e.hasCrystal
+    end
+    if e.name == 'Player' then
+      local x, y = e.collider:getPosition()
+      self.savedPlayerPosition = vector(x, y)
+    end
+  end
+  print('crystals found:', #self.crystalPositions)
+  self.saveTextTimer = 3.0
+end
+
+function Game:load()
+  if self.crystalPositions == nil or self.terminalStates == nil or self.savedPlayerPosition == nil then
+    return
+  end
+  local ci = 0
+  local ti = 0
+  for i = 1, #self.Entities do
+    local e = self.Entities[i]
+    if e.name == 'Crystal' then
+      ci = ci + 1
+      local pos = self.crystalPositions[ci]
+      e.collider:setPosition(pos.x, pos.y)
+    end
+    if e.name == 'Terminal' then
+      ti = ti + 1
+      e.hasCrystal = self.terminalStates[ti]
+    end
+    if e.name == 'Player' then
+      local pos = self.savedPlayerPosition
+      e.item = nil
+      e.collider:setPosition(pos.x, pos.y)
+    end
+  end
 end
 
 function Game:linkTerminalsAndDoors()
@@ -191,6 +250,13 @@ function Game:update(dt)
 
     if Pause.isPaused then
       Pause.update()
+    end
+
+    if self.saveTextTimer > 0 then
+      self.saveTextTimer = self.saveTextTimer - dt
+      self.displaySaveText = true
+    else
+      self.displaySaveText = false
     end
   else
     -- show end screen
@@ -282,6 +348,9 @@ function Game:draw(bool)
     -- love.graphics.rectangle('line', w, h, w, h)
   end
   self:drawDebug(false)
+  if self.displaySaveText then
+    love.graphics.draw(self.saveText, 40, 560)
+  end
 end
 
 function Game:drawEntities(bool)
@@ -334,7 +403,7 @@ end
 
 function Game:mousepressed(x, y, button)
   -- replace with checking menu buttons
-  Pause.mousepressed(x, y, button, main_theme)
+  Pause.mousepressed(x, y, button, self, main_theme)
 end
 
 return Game

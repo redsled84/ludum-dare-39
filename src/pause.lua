@@ -26,7 +26,7 @@ local restart = {
   name = 'restart',
   position = vector(resume.position.x+resume.dimensions.x+8, resume.position.y),
   dimensions = vector(140, 60),
-  str = love.graphics.newText(buttonFont, 'RESTART'),
+  str = love.graphics.newText(buttonFont, '      LOAD'),
   hovered = false,
 }
 local quit = {
@@ -118,7 +118,7 @@ function Pause.draw(s)
   love.graphics.draw(credits, controlsBox.position.x+65, controlsBox.position.y + buffer*13)
 end
 
-function Pause.mousepressed(x, y, button, theme)
+function Pause.mousepressed(x, y, button, game, theme)
   for i = 1, #buttons do
     local b = buttons[i]
     if button == 1 and b.hovered then
@@ -126,7 +126,8 @@ function Pause.mousepressed(x, y, button, theme)
         Pause.isPaused = false
       end
       if b.name == 'restart' then
-        love.event.quit('restart')
+        game:load()
+        Pause.isPaused = false
       end
       if b.name == 'quit' then
         love.event.quit()
