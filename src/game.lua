@@ -27,6 +27,7 @@ world:addCollisionClass('Gap')
 world:addCollisionClass('Player')
 world:addCollisionClass('Terminal')
 world:addCollisionClass('Checkpoint')
+world:addCollisionClass('Trigger')
 world:addCollisionClass('Projectile', {ignore={'Player'}})
 local controlsFont = love.graphics.newFont('fonts/ARCADECLASSIC.TTF', 26)
 controlsFont:setFilter('nearest', 'nearest')
@@ -44,6 +45,7 @@ local Levels = require 'src.levels'
 local Gap = require 'src.gap'
 local Pause = require 'src.pause'
 local Checkpoint = require 'src.checkpoint'
+local Trigger = require 'src.trigger'
 
 local Game = class('Game')
 
@@ -95,6 +97,7 @@ function Game:initialize()
   -- render_buffer = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
 
   self.endScreenTimer = 2.0
+  self.endFadeTimer = 2.0
   self.saveTextTimer = 0.0
 
   self.saveText = love.graphics.newText(controlsFont, "SAVED\npress   ESC   for   menu")
@@ -124,7 +127,12 @@ function Game:createColliders(grid, gridWidth, gridHeight)
       self.Entities[#self.Entities+1] = Checkpoint:new(self, vector(px, py))
     end
   end)
+  -- hardcoded checkpoint
   self.Entities[#self.Entities+1] = Checkpoint:new(self, vector(21 * tileSize, 16 * tileSize))
+  -- hardcoded end trigger
+  self.Entities[#self.Entities+1] = Trigger:new(vector(14 * tileSize, 32 * tileSize), function()
+    self.state = 'game_over'
+  end)
   Map:loopGrid(function(x, y, val)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals
@@ -210,62 +218,69 @@ end
 local thing = 0
 function Game:update(dt)
   Game:checkState()
-  if self.state ~= 'game_over' then
-    world:update(dt)
-    for i = 1, #self.Entities do
-      local entity = self.Entities[i]
-      if entity.name == 'Player' then
-        entity:update(dt)
-        entity:handleShoot(dt, self.Projectiles)
-      elseif entity.name == 'Crystal' then
-        local terminals = self:getEntities('Terminal')
-        entity:update(dt, terminals)
-      else
-        entity:update(dt)
-      end
-    end
-    for i = #self.Projectiles, 1, -1 do
-      local proj = self.Projectiles[i]
-      if proj.collider:isDestroyed() then
-        table.remove(self.Projectiles, i)
-      else
-        proj:update(dt, self.Projectiles)
-      end
-    end
-
-    local camX, camY = Player.position.x, Player.position.y
-    cam:lookAt(camX, camY)
-    cam:zoomTo(4, 4)
-
-    self:updateLights()
-
-    gameUtils.removePower(dt)
-
-    local lx, ly = -Player.position.x * 4, -Player.position.y * 4
-    lightWorld:setTranslation(-64 + lx + love.graphics.getWidth() / 2 + tileSize * 4 / 2,
-      -64 + ly + love.graphics.getHeight() / 2 + tileSize * 4 / 2, 4)
-    thing = thing + dt * 10
-    -- lightWorld:setTranslation(-64 + lx, -64 + ly, 4)
-    lightWorld:update(dt)
-
-    if Pause.isPaused then
-      Pause.update()
-    end
-
-    if self.saveTextTimer > 0 then
-      self.saveTextTimer = self.saveTextTimer - dt
-      self.displaySaveText = true
+  if self.state == 'game_over' then
+    self:finUpdate(dt)
+  end
+  world:update(dt)
+  for i = 1, #self.Entities do
+    local entity = self.Entities[i]
+    if entity.name == 'Player' then
+      entity:update(dt)
+      entity:handleShoot(dt, self.Projectiles)
+    elseif entity.name == 'Crystal' then
+      local terminals = self:getEntities('Terminal')
+      entity:update(dt, terminals)
     else
-      self.displaySaveText = false
+      entity:update(dt)
     end
+  end
+  for i = #self.Projectiles, 1, -1 do
+    local proj = self.Projectiles[i]
+    if proj.collider:isDestroyed() then
+      table.remove(self.Projectiles, i)
+    else
+      proj:update(dt, self.Projectiles)
+    end
+  end
+
+  local camX, camY = Player.position.x, Player.position.y
+  cam:lookAt(camX, camY)
+  cam:zoomTo(4, 4)
+
+  self:updateLights()
+
+  gameUtils.removePower(dt)
+
+  local lx, ly = -Player.position.x * 4, -Player.position.y * 4
+  lightWorld:setTranslation(-64 + lx + love.graphics.getWidth() / 2 + tileSize * 4 / 2,
+    -64 + ly + love.graphics.getHeight() / 2 + tileSize * 4 / 2, 4)
+  thing = thing + dt * 10
+  -- lightWorld:setTranslation(-64 + lx, -64 + ly, 4)
+  lightWorld:update(dt)
+
+  if Pause.isPaused then
+    Pause.update()
+  end
+
+  if self.saveTextTimer > 0 then
+    self.saveTextTimer = self.saveTextTimer - dt
+    self.displaySaveText = true
   else
-    -- show end screen
-    -- mute the sound
-    main_theme:stop()
-    -- fade out
-    if self.endScreenTimer > 0 then
-      self.endScreenTimer = self.endScreenTimer - dt
-    end
+    self.displaySaveText = false
+  end
+end
+
+function Game:finUpdate(dt)
+  if self.endFadeTimer > 0 then
+    self.endFadeTimer = self.endFadeTimer - dt
+    main_theme:setVolume(0.3 * (self.endFadeTimer / 2.0))
+    return
+  end
+
+  -- fade out
+  if self.endScreenTimer > 0 then
+    self.endScreenTimer = self.endScreenTimer - dt
+    return
   end
 end
 
@@ -306,50 +321,47 @@ function Game:checkState()
   end
 end
 
-function Game:draw(bool)
-  if not bool then return end
-
-  if self.state == 'game_over' then
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(end_screen)
-    love.graphics.setColor(0, 0, 0, 255 * self.endScreenTimer / 2.0)
+function Game:drawEndScreen()
+  if self.endFadeTimer > 0 then
+    love.graphics.setColor(0, 0, 0, 255 * (1 - self.endFadeTimer / 2.0))
     love.graphics.rectangle('fill', 0, 0, 640, 640)
     return
   end
+  love.graphics.setColor(255, 255, 255)
+  love.graphics.draw(end_screen)
+  love.graphics.setColor(0, 0, 0, 255 * self.endScreenTimer / 2.0)
+  love.graphics.rectangle('fill', 0, 0, 640, 640)
+  return
+end
 
-  if self.state == 'game_start' then
-    cam:attach()
+function Game:draw(bool)
+  if not bool then return end
 
-    lightWorld:draw(function()
-      Map:drawLayer('floor')
-      Map:drawLayer('stair')
-      Map:drawLayer('wall')
+  cam:attach()
 
-      Player:drawParticles()
-      self:drawEntities(true)
-      self:drawProjectiles(true)
+  lightWorld:draw(function()
+    Map:drawLayer('floor')
+    Map:drawLayer('stair')
+    Map:drawLayer('wall')
 
-      Player:draw()
-    end)
+    Player:drawParticles()
+    self:drawEntities(true)
+    self:drawProjectiles(true)
 
-    cam:detach()
-    if Pause.isPaused then
-      Pause.draw()
-    end
-    -- love.graphics.setCanvas()
-    -- post_shader:drawWith(render_buffer)
-    -- HUD:draw(Player)
-    -- love.graphics.setColor(255,255,255)
-    -- local w, h = love.graphics.getWidth()/2, love.graphics.getHeight()/2
-    -- love.graphics.rectangle('line', 0, 0, 64, 64)
-    -- love.graphics.rectangle('line', 0, 0, w, h)
-    -- love.graphics.rectangle('line', 0, h, w, h)
-    -- love.graphics.rectangle('line', w, 0, w, h)
-    -- love.graphics.rectangle('line', w, h, w, h)
+    Player:draw()
+  end)
+
+  cam:detach()
+  if Pause.isPaused then
+    Pause.draw()
   end
-  self:drawDebug(false)
+
   if self.displaySaveText then
     love.graphics.draw(self.saveText, 40, 560)
+  end
+
+  if self.state == 'game_over' then
+    self:drawEndScreen()
   end
 end
 

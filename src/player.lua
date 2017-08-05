@@ -98,15 +98,6 @@ function Player:update(dt)
   end
   self:updateParticles()
   self.psystem:update(dt)
-
-  if self.position.y > 32 * tileSize then
-    -- fade to end screen
-    self.endScreenTimer = self.endScreenTimer - dt
-    main_theme:setVolume(0.3 * (self.endScreenTimer / 2.0))
-    if self.endScreenTimer <= 0 then
-      self.game.state = 'game_over'
-    end
-  end
 end
 
 function Player:handleShoot(dt, Projectiles)
@@ -240,8 +231,6 @@ end
 
 function Player:draw()
   self:drawSprites()
-  love.graphics.setColor(0, 0, 0, 255 * (1 - self.endScreenTimer / 2.0))
-  love.graphics.rectangle('fill', 0, 0, 640, 640)
 end
 
 function Player:drawParticles()
