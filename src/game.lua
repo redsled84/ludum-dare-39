@@ -105,7 +105,6 @@ end
 
 function Game:createColliders(grid, gridWidth, gridHeight)
   --Checkpoint:new(vector(2 * tileSize, 7 * tileSize))
-  Checkpoint:new(vector(21 * tileSize, 16 * tileSize))
   Map:loopGrid(function(x, y, val)
     local px, py = x * tileSize, y * tileSize
     if val == 1 then
@@ -121,7 +120,11 @@ function Game:createColliders(grid, gridWidth, gridHeight)
     if val == 5 then
       self.Entities[#self.Entities+1] = Gap:new(vector(px, py))
     end
+    if val == 6 then
+      self.Entities[#self.Entities+1] = Checkpoint:new(self, vector(px, py))
+    end
   end)
+  self.Entities[#self.Entities+1] = Checkpoint:new(self, vector(21 * tileSize, 16 * tileSize))
   Map:loopGrid(function(x, y, val)
     local px, py = x * tileSize, y * tileSize
     -- In this order so Crystals are drawn over Doors and Terminals

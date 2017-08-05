@@ -107,10 +107,6 @@ function Player:update(dt)
       self.game.state = 'game_over'
     end
   end
-
-  if self.collider:enter('Checkpoint') then
-    self.game:save()
-  end
 end
 
 function Player:handleShoot(dt, Projectiles)
