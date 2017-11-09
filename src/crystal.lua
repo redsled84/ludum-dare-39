@@ -59,6 +59,7 @@ end
 
 function Crystal:draw()
   local x, y = self.position.x, self.position.y
+  love.graphics.setColor(255, 255, 255)
   love.graphics.draw(self.sprite, x, y)
 end
 

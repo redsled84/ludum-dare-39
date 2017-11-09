@@ -65,7 +65,7 @@ function Player:initialize(game, spawnVector)
   }
   self.finishedMap = false
   self.velocity = zeroVector
-  self.speed = 60
+  self.speed = 100
   self.actionKey = false
   self.hasCrystal = false
   self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2.8)
@@ -294,6 +294,8 @@ function Player:action()
     if #colliders == 0 then
       -- drop the crystal
       self.item.pickedUp = false
+      local x, y = self.item.collider:getPosition()
+      self.item.collider:setPosition(x - (x % tileSize) + tileSize / 2, y - (y % tileSize) + tileSize / 2)
       self.item = nil
     else
       -- put the crystal in the terminal
