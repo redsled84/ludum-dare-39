@@ -130,7 +130,9 @@ function Game:createColliders(grid, gridWidth, gridHeight)
   -- hardcoded checkpoint
   self.Entities[#self.Entities+1] = Checkpoint:new(self, vector(21 * tileSize, 16 * tileSize))
   -- hardcoded end trigger
-  self.Entities[#self.Entities+1] = Trigger:new(vector(14 * tileSize, 32 * tileSize), function()
+  local endX = #Levels > 20 and 14 or 11
+  local endY = #Levels > 20 and 32 or 15
+  self.Entities[#self.Entities+1] = Trigger:new(vector(endX * tileSize, endY * tileSize), function()
     self.state = 'game_over'
   end)
   Map:loopGrid(function(x, y, val)

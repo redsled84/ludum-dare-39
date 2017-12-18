@@ -65,7 +65,7 @@ function Player:initialize(game, spawnVector)
   }
   self.finishedMap = false
   self.velocity = zeroVector
-  self.speed = 100
+  self.speed = 60
   self.actionKey = false
   self.hasCrystal = false
   self.collider = world:newCircleCollider(self.position.x, self.position.y, tileSize / 2.8)
